@@ -10,7 +10,16 @@ from datetime import datetime, timezone, date
 app = FastAPI()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
-conn = psycopg2.connect(DATABASE_URL)
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set")
+
+conn = None
+
+@app.on_event("startup")
+def startup():
+    global conn
+    conn = psycopg2.connect(DATABASE_URL)
 
 app.add_middleware(
     CORSMiddleware,
