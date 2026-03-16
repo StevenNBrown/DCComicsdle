@@ -9,9 +9,8 @@ from datetime import datetime, timezone, date
 
 app = FastAPI()
 
-conn = psycopg2.connect(
-    "postgresql://neondb_owner:npg_qWkSa79eCNXI@ep-calm-dew-aef8rwqs-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+conn = psycopg2.connect(DATABASE_URL)
 
 app.add_middleware(
     CORSMiddleware,
