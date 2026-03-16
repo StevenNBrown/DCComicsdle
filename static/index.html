@@ -200,6 +200,57 @@ td img {
     align-items: center;
     text-align:center;
 }
+
+@media (max-width: 768px){
+
+    body{
+        background-attachment: scroll;
+    }
+
+    #logo img{
+        width:70vw;
+    }
+
+    input{
+        width:80%;
+        max-width:250px;
+    }
+
+    /* TABLE AUTO SCALE */
+    table{
+        width:100%;
+    }
+
+    th{
+        width:auto;
+        font-size:10px;
+        padding:4px;
+    }
+
+    td{
+        width:auto;
+        height:11vw;
+        font-size:10px;
+    }
+
+    td img{
+        object-fit:cover;
+    }
+
+    /* CHARACTER IMAGE */
+    #characterImage{
+        width:60vw;
+        height:auto;
+    }
+
+    /* LEGEND RESIZE */
+    .legendCell{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
+
+}
 </style>
 
 </head>
