@@ -7,7 +7,6 @@ const HINT3_UNLOCK_COUNT = 12  // change this number anytime
 let secret = null  // store secret character
 
 async function startGame(){
-
     const res = await fetch(`/start?n=${puzzleOffset}`)
     const data = await res.json()
     secret = data.secret
@@ -40,9 +39,16 @@ function updatePuzzleDisplay(){
 }
 
 function resetGame(){
-
+    
     guesses = []
-    document.getElementById("characterImageContainer").style.display = "none"
+
+    const imgContainer = document.getElementById("characterImageContainer")
+    imgContainer.style.display = "none"
+
+    const nameElm = document.getElementById("Name")
+    nameElm.style.display = "none"
+    nameElm.textContent = ""   // clear old name
+
     const table = document.getElementById("guessTable")
     while(table.rows.length > 1){
         table.deleteRow(1)
@@ -53,7 +59,7 @@ function resetGame(){
 
     hideAllHints()
     updateGuessesLeft()
-
+    startGame()
 }
 
 function updateGuessesLeft(){
