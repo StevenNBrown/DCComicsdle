@@ -201,54 +201,41 @@ td img {
     text-align:center;
 }
 
-@media (max-width: 768px){
+@media (max-width:768px){
 
-    body{
-        background-attachment: scroll;
-    }
+/* table fits screen */
+table{
+    width:100%;
+}
 
-    #logo img{
-        width:70vw;
-    }
+/* make cells scale like legend cells */
+td{
+    width:11vw;
+    height:11vw;
+    min-width:35px;
+    min-height:35px;
+    font-size:2.2vw;
+}
 
-    input{
-        width:80%;
-        max-width:250px;
-    }
+/* headers scale too */
+th{
+    width:11vw;
+    font-size:2.5vw;
+    padding:4px;
+}
 
-    /* TABLE AUTO SCALE */
-    table{
-        width:100%;
-    }
+/* keep images inside cells */
+td img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
-    th{
-        width:18vw;
-        height:18vw;
-        font-size:10px;
-    }
-
-    td{
-        width:18vw;
-        height:18vw;
-        font-size:10px;
-    }
-
-    td img{
-        object-fit:cover;
-    }
-
-    /* CHARACTER IMAGE */
-    #characterImage{
-        width:60vw;
-        height:auto;
-    }
-
-    /* LEGEND RESIZE */
-    .legendCell{
-        width:18vw;
-        height:18vw;
-        font-size:10px;
-    }
+/* character image scale */
+#characterImage{
+    width:60vw;
+    height:auto;
+}
 
 }
 </style>
