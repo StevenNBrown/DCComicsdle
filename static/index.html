@@ -201,72 +201,54 @@ td img {
     text-align:center;
 }
 
-/* MOBILE FIXES */
-@media (max-width:768px){
+@media (max-width: 768px){
 
-body{
-background-attachment:scroll;
-min-height:100vh;
-}
+    body{
+        background-attachment: scroll;
+    }
 
-/* logo */
-#logo img{
-width:70vw;
-}
+    #logo img{
+        width:70vw;
+    }
 
-/* input */
-input{
-width:80%;
-max-width:260px;
-}
+    input{
+        width:80%;
+        max-width:250px;
+    }
 
-/* TABLE */
+    /* TABLE AUTO SCALE */
+    table{
+        width:100%;
+    }
 
-table{
-width:100%;
-table-layout:fixed;
-}
+    th{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
 
-/* keep cells square but prevent squish */
+    td{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
 
-td{
-width:auto;
-height:12vw;
-min-height:45px;
-font-size:10px;
-}
+    td img{
+        object-fit:cover;
+    }
 
-th{
-font-size:10px;
-padding:4px;
-}
+    /* CHARACTER IMAGE */
+    #characterImage{
+        width:60vw;
+        height:auto;
+    }
 
-/* keep image contained */
-
-td img{
-object-fit:cover;
-}
-
-/* character image */
-
-#characterImage{
-width:60vw;
-height:auto;
-}
-
-/* legend */
-
-#legendBox{
-flex-wrap:wrap;
-}
-
-.legendCell{
-width:18vw;
-height:18vw;
-min-width:60px;
-min-height:60px;
-font-size:10px;
-}
+    /* LEGEND RESIZE */
+    .legendCell{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
 
 }
 </style>
