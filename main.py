@@ -8,10 +8,10 @@ import os
 from datetime import datetime, timezone, date
 
 app = FastAPI()
-static_dir = os.path.join(os.path.dirname(__file__), "static")
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-conn = psycopg2.connect(DATABASE_URL)
+conn = psycopg2.connect(
+    "postgresql://neondb_owner:npg_qWkSa79eCNXI@ep-calm-dew-aef8rwqs-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,7 +24,8 @@ app.add_middleware(
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(os.path.join(static_dir, "favicon.ico"))
-
+guesses=[]
+static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
