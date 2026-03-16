@@ -203,12 +203,11 @@ td img {
 
 @media (max-width: 768px){
 
-    /* Prevent page horizontal movement */
     html, body{
         overflow-x: hidden;
     }
 
-    /* Scroll ONLY the table */
+    /* Scroll only table */
     #tableWrapper{
         width:100%;
         overflow-x:auto;
@@ -216,28 +215,19 @@ td img {
         -webkit-overflow-scrolling:touch;
     }
 
+    /* Make table wider so it scrolls */
     #guessTable{
-        width:max-content;   /* allows real scrolling */
-        min-width:600px;
+        width:max-content;
+        min-width:800px;
         table-layout:fixed;
     }
 
-    /* Smaller cells */
+    /* Make squares smaller on mobile */
     td, th{
-        width:75px;
-        height:95px;
-        font-size:10px;
+        width:80px;              /* smaller than desktop */
+        font-size:11px;
     }
 
-    #legendBox{
-        gap:5px;
-    }
-
-    .legendCell{
-        width:18vw;
-        height:18vw;
-        font-size:10px;
-    }
 }
 </style>
 
