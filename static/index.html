@@ -201,76 +201,43 @@ td img {
     text-align:center;
 }
 
-/* MOBILE FIXES */
-@media (max-width:768px){
+@media (max-width: 768px){
 
-body{
-    background-attachment:scroll;
-    min-height:100vh;
-}
+    /* Prevent page horizontal movement */
+    html, body{
+        overflow-x: hidden;
+    }
 
-/* logo */
-#logo img{
-    width:70vw;
-}
+    /* Scroll ONLY the table */
+    #tableWrapper{
+        width:100%;
+        overflow-x:auto;
+        overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;
+    }
 
-/* input */
-input{
-    width:80%;
-    max-width:260px;
-}
+    #guessTable{
+        width:max-content;   /* allows real scrolling */
+        min-width:600px;
+        table-layout:fixed;
+    }
 
-/* TABLE */
+    /* Smaller cells */
+    td, th{
+        width:75px;
+        height:95px;
+        font-size:10px;
+    }
 
-table{
-    width:100%;
-    table-layout:fixed;
-}
+    #legendBox{
+        gap:5px;
+    }
 
-/* keep cells square but prevent squish */
-
-td{
-    width:18vw;
-    height:18vw;
-    min-width:60px;
-    min-height:60px;
-    font-size:10px;;
-}
-
-th{
-    width:18vw;
-    height:8vw;
-    min-width:60px;
-    min-height:60px;
-    font-size:10px;
-}
-
-/* keep image contained */
-
-td img{
-    object-fit:cover;
-}
-
-/* character image */
-
-#characterImage{
-    width:60vw;
-    height:auto;
-}
-
-/* legend */
-
-#legendBox{
-    flex-wrap:wrap;
-}
-.legendCell{
-    width:18vw;
-    height:18vw;
-    min-width:60px;
-    min-height:60px;
-    font-size:10px;
-}
-
+    .legendCell{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
 }
 </style>
 
@@ -322,23 +289,24 @@ td img{
 </div>
 
 
+<div id="tableWrapper">
 
-<table id="guessTable">
+    <table id="guessTable">
 
-<tr>
-<th></th>
-<th>Gender</th>
-<th>Type</th>
-<th>Species</th>
-<th>Powers</th>
-<th>Origin</th>
-<th>Affiliations</th>
-<th>Year</th>
-<th>Appearances</th>
-</tr>
+    <tr>
+    <th></th>
+    <th>Gender</th>
+    <th>Type</th>
+    <th>Species</th>
+    <th>Powers</th>
+    <th>Origin</th>
+    <th>Affiliations</th>
+    <th>Year</th>
+    <th>Appearances</th>
+    </tr>
 
-</table>
-
+    </table>
+</div>
 
 
 <script src="/static/game.js" defer></script>
