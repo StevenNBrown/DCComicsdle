@@ -289,7 +289,17 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
 
 async function submitGuess(){
 
-    const name = document.getElementById("guessInput").value
+    const name = document.getElementById("guessInput").value.trim()
+
+    // ✅ PREVENT DUPLICATES
+    const alreadyGuessed = guesses.some(g => 
+        g.charname.toLowerCase() === name.toLowerCase()
+    )
+
+    if (alreadyGuessed) {
+        alert("You already guessed that character!");
+        return;
+    }
 
     const res = await fetch("/guess",{
         method:"POST",
@@ -312,8 +322,6 @@ async function submitGuess(){
     updateHints()        
     updateGuessesLeft() 
     addGuessRow(data, secret)
-
-    
 }
 
 function addGuessRow(data, secret, finished=false) {
@@ -386,31 +394,58 @@ function addGuessRow(data, secret, finished=false) {
     nextBtn.disabled = false
 }, animationTime + 50)
 }
-document.addEventListener("DOMContentLoaded", () => {
-    const guessInput = document.getElementById("guessInput")
-    const datalist = document.getElementById("charList")
+const guessInput = document.getElementById("guessInput");
+const dropdown = document.getElementById("dropdown");
 
-    guessInput.addEventListener("input", async function() {
-        const q = guessInput.value
-        if (!q) return
+guessInput.addEventListener("input", async function () {
 
-        const res = await fetch(`/search?q=${encodeURIComponent(q)}`)
-        if (!res.ok) return
-        const data = await res.json()
+    const query = guessInput.value.trim();
 
-        datalist.innerHTML = ""
-        const added = new Set()
+    if (!query) {
+        dropdown.innerHTML = "";
+        return;
+    }
+
+    try {
+        const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!Array.isArray(data)) return;
+
+        dropdown.innerHTML = "";
 
         data.forEach(item => {
-            const canonical = item.charname
-            if (added.has(canonical)) return
-            const option = document.createElement("option")
-            option.value = canonical   // shows canonical name
-            option.dataset.charname = canonical // always submit canonical
-            datalist.appendChild(option)
-            added.add(canonical)
-        })
-    })
+
+            const div = document.createElement("div");
+            div.className = "dropdown-item";
+
+            div.innerHTML = `
+                <img src="${item.photo_url}">
+                <span>${item.charname}</span>
+            `;
+
+            // ✅ When clicked → fill input with canonical name
+            div.onclick = () => {
+                guessInput.value = item.charname;
+                dropdown.innerHTML = "";
+            };
+
+            dropdown.appendChild(div);
+        });
+
+    } catch (err) {
+        console.error("Search failed:", err);
+    }
+});
+    // Optional: when user selects an option, show the corresponding image
+    guessInput.addEventListener("change", function () {
+        const val = guessInput.value;
+        const option = Array.from(dropdown.options).find(opt => opt.value === val);
+        if (option && preview) {
+            preview.src = option.dataset.photo || "";
+        }
+    });
 
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
@@ -427,7 +462,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     })
-})
+
 
 function showWin(data){
 
