@@ -5,16 +5,53 @@ const HINT2_UNLOCK_COUNT = 9  // change this number anytime
 const HINT3_UNLOCK_COUNT = 12  // change this number anytime
 
 let secret = null  // store secret character
+let currentPuzzleNumber = null
+let todaysPuzzle = null
 
 async function startGame(){
+    guesses = []
+
     const res = await fetch(`/start?n=${puzzleOffset}`)
     const data = await res.json()
+
     secret = data.secret
     currentPuzzleNumber = data.puzzle_number
-    todaysPuzzle= data.todays_puzzle
+    todaysPuzzle = data.todays_puzzle
+
     updateGuessesLeft()
     updatePuzzleDisplay()
     updateNavButtons()
+    updateHints()
+
+// ===============================
+// LOAD SAVED DATA
+// ===============================
+
+const savedPuzzle = localStorage.getItem("dccomicsdle_puzzle")
+const savedGuesses = localStorage.getItem(
+    `dccomicsdle_guesses_${currentPuzzleNumber}`
+)
+
+if (savedGuesses) {
+
+    const previous = JSON.parse(savedGuesses)
+
+    previous.forEach(g => {
+        guesses.push(g)
+        addGuessRow(g, secret)
+    })
+
+    updateHints()
+    updateGuessesLeft()
+
+    if (previous.some(g => g.correct)) {
+        showWin()
+        updateHints()
+
+    }
+}
+    // Clear old puzzle data
+  
 
 }
 startGame()
@@ -40,7 +77,6 @@ function updatePuzzleDisplay(){
 
 function resetGame(){
     
-    guesses = []
 
     const imgContainer = document.getElementById("characterImageContainer")
     imgContainer.style.display = "none"
@@ -59,7 +95,6 @@ function resetGame(){
 
     hideAllHints()
     updateGuessesLeft()
-    startGame()
 }
 
 function updateGuessesLeft(){
@@ -294,7 +329,12 @@ function addGuessRow(data, secret) {
     })
 
     table.insertBefore(row, table.rows[1])
+    localStorage.setItem(
+    `dccomicsdle_guesses_${currentPuzzleNumber}`,
+    JSON.stringify(guesses)
+    )
 
+    localStorage.setItem("dccomicsdle_last_puzzle", currentPuzzleNumber)
     // Fade in left → right
     cells.forEach((cell, index) => {
         setTimeout(() => {
@@ -356,6 +396,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function showWin(data){
 
+    // Save win PER puzzle
+    localStorage.setItem(
+        `dccomicsdle_completed_${currentPuzzleNumber}`,
+        "true"
+    )
+
     document.getElementById("guessInput").disabled = true
     document.querySelector("#guessArea button").disabled = true
 
@@ -364,11 +410,10 @@ function showWin(data){
 
     img.src = secret.photo_url
     imgContainer.style.display = "block"
+
     const nameElm = document.getElementById("Name")
 
-    const isVisible = nameElm.style.display === "block"
-
-    if(!isVisible){
+    if(nameElm.style.display !== "block"){
         nameElm.textContent = `${secret.charname}`
         nameElm.style.display = "block"
     }
