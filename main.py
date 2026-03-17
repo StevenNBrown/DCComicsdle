@@ -122,23 +122,29 @@ def search_characters(q: str):
 
     try:
         cur.execute("""
-            SELECT DISTINCT c.charname, c.photo_url
-            FROM dccomicsdle_schema.character_info c
-            WHERE LOWER(c.charname) LIKE %s
-            OR c.charname IN (
-                SELECT a.charname
-                FROM dccomicsdle_schema.aliases a
-                WHERE LOWER(a.aliases) LIKE %s
-            )
-            ORDER BY c.charname
-            LIMIT 20
-        """, (f"%{q.lower()}%", f"%{q.lower()}%"))
+        SELECT c.charname, c.photo_url
+        FROM dccomicsdle_schema.character_info c
+        LEFT JOIN dccomicsdle_schema.aliases a 
+            ON c.charname = a.charname
+        WHERE LOWER(c.charname) LIKE %s
+        OR LOWER(a.aliases) LIKE %s
+        GROUP BY c.charname, c.photo_url
+        ORDER BY 
+            CASE 
+                WHEN LOWER(c.charname) = %s THEN 0
+                WHEN LOWER(c.charname) LIKE %s THEN 1
+                WHEN MAX(LOWER(a.aliases)) LIKE %s THEN 2
+                ELSE 3
+            END,
+            c.charname
+        LIMIT 20
+    """, (f"%{q.lower()}%", f"%{q.lower()}%",f"%{q.lower()}%",f"%{q.lower()}%", f"%{q.lower()}%"))
 
         rows = cur.fetchall()
 
         return [
-            {"charname": row[0], "photo_url": row[1]}
-            for row in rows
+        {"charname": row[0], "photo_url": row[1]}
+        for row in rows
         ]
 
     finally:
