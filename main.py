@@ -51,6 +51,9 @@ def start_game(n: int = 0):
     today = datetime.now(timezone.utc).date()
     puzzle_number = (today - launch_date).days-n
     
+    if(puzzle_number<1):
+        puzzle_number=1
+        
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
