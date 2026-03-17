@@ -4,7 +4,7 @@ Hey there!
 I've created a live wordle type game for the world of DC Comics. 
 WELCOME TO DCCOMICSDLE
 
-This was developed using Neon Database, FAST API, Python (Including several more libraries) for the backend and HTML,CSS and JavaScript for the front end.
+This was developed using PostgreSQL hosted on Neon Console, FAST API, Python (Including several more libraries) for the backend and HTML,CSS and JavaScript for the front end all hosten On Render.
 I was inspired by three things to make this game:
 1. I've always been a huge comic book fan and wanted a project that combined my passion for the comic book genre and my computer science background
 2. The game Marveldle was a huge inspiration its basically the same game but for Marvel comics, I really enjoyed playing this game and realized an opportunity to make one for DC
