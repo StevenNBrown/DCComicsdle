@@ -92,6 +92,7 @@ function resetGame(){
     document.querySelector("#guessArea button").disabled = false
 
     hideAllHints()
+    updateNavButtons()
     updateGuessesLeft()
     startGame()
 }
