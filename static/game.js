@@ -8,8 +8,10 @@ let secret = null  // store secret character
 let currentPuzzleNumber = null
 let todaysPuzzle = null
 
-async function startGame(){
+async function startGame() {
+
     guesses = []
+    secret = null
 
     const res = await fetch(`/start?n=${puzzleOffset}`)
     const data = await res.json()
@@ -18,37 +20,38 @@ async function startGame(){
     currentPuzzleNumber = data.puzzle_number
     todaysPuzzle = data.todays_puzzle
 
-    updateGuessesLeft()
     updatePuzzleDisplay()
     updateNavButtons()
-    updateHints()
 
-// ===============================
-// LOAD SAVED DATA
-// ===============================
+    // ===============================
+    // LOAD SAVED GUESSES
+    // ===============================
+    const savedGuesses = localStorage.getItem(
+        `dccomicsdle_guesses_${currentPuzzleNumber}`
+    )
 
-const savedPuzzle = localStorage.getItem("dccomicsdle_puzzle")
-const savedGuesses = localStorage.getItem(
-    `dccomicsdle_guesses_${currentPuzzleNumber}`
-)
+    if (savedGuesses) {
+        const previous = JSON.parse(savedGuesses)
 
-if (savedGuesses) {
-
-    const previous = JSON.parse(savedGuesses)
-
-    previous.forEach(g => {
-        guesses.push(g)
-        addGuessRow(g, secret)
-    })
+        previous.forEach(g => {
+            guesses.push(g)
+            addGuessRow(g, secret)
+        })
+    }
 
     updateHints()
     updateGuessesLeft()
 
+    // ===============================
+    // CHECK WIN AFTER LOADING GUESSES
+    // ===============================
+    const completed = localStorage.getItem(
+        `dccomicsdle_completed_${currentPuzzleNumber}`
+    )
 
-}
-    // Clear old puzzle data
-  
-
+    if (completed === "true") {
+        showWin()
+    }
 }
 startGame()
 
