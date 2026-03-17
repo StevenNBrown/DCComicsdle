@@ -1,4 +1,3 @@
-#DCComicsdle
 
 Hey there!
 
