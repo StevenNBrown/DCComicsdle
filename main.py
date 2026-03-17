@@ -114,30 +114,36 @@ def start_game(n: int = 0):
 
 @app.get("/search")
 def search_characters(q: str):
+
+    if not q:
+        return []
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""
-        SELECT c.charname, a.aliases
-        FROM dccomicsdle_schema.character_info c
-        LEFT JOIN dccomicsdle_schema.aliases a
-        ON c.charname = a.charname
-        WHERE LOWER(c.charname) LIKE %s OR LOWER(a.aliases) LIKE %s
-        LIMIT 20
-    """, (f"%{q.lower()}%", f"%{q.lower()}%"))
-    rows = cur.fetchall()
 
-    # Build list of options
-    options = []
-    seen = set()
-    for charname, alias in rows:
-        if charname not in seen:
-            options.append({"charname": charname, "display_name": charname})
-            seen.add(charname)
-        if alias and alias.lower().startswith(q.lower()) and alias not in seen:
-            options.append({"charname": charname, "display_name": alias})
-            seen.add(alias)
+    try:
+        cur.execute("""
+            SELECT DISTINCT c.charname, c.photo_url
+            FROM dccomicsdle_schema.character_info c
+            WHERE LOWER(c.charname) LIKE %s
+            OR c.charname IN (
+                SELECT a.charname
+                FROM dccomicsdle_schema.aliases a
+                WHERE LOWER(a.aliases) LIKE %s
+            )
+            ORDER BY c.charname
+            LIMIT 20
+        """, (f"%{q.lower()}%", f"%{q.lower()}%"))
 
-    return options
+        rows = cur.fetchall()
+
+        return [
+            {"charname": row[0], "photo_url": row[1]}
+            for row in rows
+        ]
+
+    finally:
+        conn.close()
+        cur.close()
 
 @app.post("/guess")
 def guess_character(guess: Guess):
