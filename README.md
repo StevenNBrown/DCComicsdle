@@ -1,16 +1,29 @@
-# DCComicsdle
+#DCComicsdle
+
 Hey there!
 
-I've created a live wordle type game for the world of DC Comics. 
-WELCOME TO DCCOMICSDLE
+I created a live Wordle-style game for fans of DC Comics.
 
-This was developed using PostgreSQL hosted on Neon Console, FAST API, Python (Including several more libraries) for the backend and HTML,CSS and JavaScript for the front end all hosten On Render.
-I was inspired by three things to make this game:
-1. I've always been a huge comic book fan and wanted a project that combined my passion for the comic book genre and my computer science background
-2. The game Marveldle was a huge inspiration its basically the same game but for Marvel comics, I really enjoyed playing this game and realized an opportunity to make one for DC
-3. Before development I went to see if one already existed, I found DCdle a game with the same intent and concept of DCComicsdle but I found myself dissapointed by it, there were few characters included in their DB and I even noticed some categories were wrong for some character fields.
-So while that game was good I figured I could make some improvements.
+Welcome to DCComicsdle!
 
-DCComicsdle can be played currently at dccomicsdle.onrender.com 
+This project was built using PostgreSQL (hosted on Neon), FastAPI, and Python for the backend, with HTML, CSS, and JavaScript powering the frontend. The application is hosted on Render.
 
-Thanks for checking it out and have fun playing!
+Inspiration
+
+There were three main reasons I decided to create this game:
+
+My love for comic books.
+I’ve always been a big comic book fan and wanted to build a project that combined my passion for comics with my computer science background.
+
+Marveldle.
+The game Marveldle was a huge inspiration. I really enjoyed playing it and realized there was a great opportunity to create something similar for the DC universe.
+
+Improving existing DC guessing games.
+While researching, I found DCdle, which had the same concept as DCComicsdle. Although it was a fun idea, I noticed that the database included relatively few characters and some category information appeared incorrect. That motivated me to create a version with a larger and more accurate character database.
+
+Play the Game
+
+You can currently play DCComicsdle here:
+dccomicsdle.onrender.com
+
+Thanks for checking it out, and I hope you enjoy playing!
