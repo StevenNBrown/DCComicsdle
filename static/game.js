@@ -22,7 +22,10 @@ async function startGame() {
 
     updatePuzzleDisplay()
     updateNavButtons()
-
+    const countdown = document.getElementById("countdown")
+    const counthead = document.getElementById("counthead")
+    countdown.style.display = "none"
+    counthead.style.display = "none"
     // ===============================
     // LOAD SAVED GUESSES
     // ===============================
@@ -381,7 +384,7 @@ function addGuessRow(data, secret, finished=false) {
     setTimeout(() => {
     prevBtn.disabled = false
     nextBtn.disabled = false
-}, animationTime + 150)
+}, animationTime + 50)
 }
 document.addEventListener("DOMContentLoaded", () => {
     const guessInput = document.getElementById("guessInput")
