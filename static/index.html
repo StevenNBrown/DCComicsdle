@@ -68,29 +68,34 @@ table{
     table-layout:fixed; /* fixed column widths */
 }
 
-td {
-    width: 130px;
-    height: 130px;
-    padding: 2px;
-    font-size: 14px;   /* base size */
-    opacity: 0;
-    transition: opacity 0.5s ease;
-              /* remove default padding for flex */
+td{
+    width:130px;
+    height:130px;
+    max-height:130px;
+    padding:2px;
+
+    overflow:hidden;
+
+    opacity:0;
+    transition:opacity 0.5s ease;
 }
 
-td div {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+td div{
+    display:flex;
+    justify-content:center;
+    align-items:center;
 
-    width: 100%;
-    height: 100%;
+    width:100%;
+    height:100%;
 
-    overflow: hidden;        /* ❌ no scrolling */
-    word-break: break-word;  /* wrap long text */
-    text-align: center;
+    text-align:center;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    font-size:clamp(6px,0.9vw,14px);
 }
+
 th{
     padding:10px;
     width:120px;      /* fixed width for all cells */
@@ -203,11 +208,12 @@ td img {
 
 @media (max-width: 768px){
 
+    /* Prevent page horizontal movement */
     html, body{
         overflow-x: hidden;
     }
 
-    /* Scroll only table */
+    /* Scroll ONLY the table */
     #tableWrapper{
         width:100%;
         overflow-x:auto;
@@ -215,29 +221,28 @@ td img {
         -webkit-overflow-scrolling:touch;
     }
 
-    /* Make table wider so it scrolls */
     #guessTable{
-        width:max-content;
-        min-width:800px;
+        width:max-content;   /* allows real scrolling */
+        min-width:600px;
         table-layout:fixed;
     }
 
-    /* Make squares smaller on mobile */
-     td, th{
-        width:80px;
-        height: 80px;
+    /* Smaller cells */
+    td, th{
+        width:95px;
+        aspect-ratio: 1/1;
         font-size:10px;
     }
-    #legendBox{
-            gap:5px;
-        }
-    
-        .legendCell{
-            width:18vw;
-            height:18vw;
-            font-size:10px;
-        }
 
+    #legendBox{
+        gap:5px;
+    }
+
+    .legendCell{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
 }
 </style>
 
@@ -272,7 +277,10 @@ td img {
 <button onclick="submitGuess()">GUESS</button>
 
 </div>
-
+<div id="winScreen">
+     <div id="counthead" style="font-size: 16px;"></div>
+    <div id="countdown" style="font-weight: bold; font-size: 20px;"></div>
+</div>
 <div id="oldgameContainer">
 
     <p id="oldgames"></p>
