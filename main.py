@@ -138,7 +138,7 @@ def search_characters(q: str):
             END,
             c.charname
         LIMIT 20
-    """, (f"%{q.lower()}%", f"%{q.lower()}%",f"%{q.lower()}%",f"%{q.lower()}%", f"%{q.lower()}%"))
+    """, (f"%{q.lower()}%", f"%{q.lower()}%",f"{q.lower()}",f"%{q.lower()}%", f"%{q.lower()}%"))
 
         rows = cur.fetchall()
 
