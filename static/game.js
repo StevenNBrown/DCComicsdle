@@ -240,24 +240,24 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
     // ======================
     // NORMAL EXACT MATCH
     // ======================
-    if (fieldValue.toString().toLowerCase() === 
-        secretValue.toString().toLowerCase()) {
-        return "correct"
-    }
-
+    
     // ======================
     // PARTIAL MATCH
     // ======================
     const fieldList = fieldValue
-        .toString()
-        .split(",")
-        .map(s => s.trim().toLowerCase())
+    .toString()
+    .split(",")
+    .map(s => s.trim().toLowerCase())
+    .sort()
 
     const secretList = secretValue
-        .toString()
-        .split(",")
-        .map(s => s.trim().toLowerCase())
-
+    .toString()
+    .split(",")
+    .map(s => s.trim().toLowerCase())
+    .sort()
+    if (JSON.stringify(fieldList) === JSON.stringify(secretList)) {
+        return "correct"
+    }
     const intersection = fieldList.filter(item =>
         secretList.includes(item)
     )
