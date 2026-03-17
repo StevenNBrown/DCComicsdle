@@ -27,20 +27,28 @@ async function startGame() {
     // LOAD SAVED GUESSES
     // ===============================
     const savedGuesses = localStorage.getItem(
-        `dccomicsdle_guesses_${currentPuzzleNumber}`
+    `dccomicsdle_guesses_${currentPuzzleNumber}`
     )
 
     if (savedGuesses) {
-        const previous = JSON.parse(savedGuesses)
+        const saved = JSON.parse(savedGuesses)
 
-        previous.forEach(g => {
-            guesses.push(g)
-            addGuessRow(g, secret, true)
-             if (guesses.length>0 && guesses[guesses.length-1].charname === secret.charname) {
-                    showWin()
-                    return
-                }
-        })
+        if (saved && saved.length > 0) {
+            saved.forEach(g => {
+                guesses.push(g)
+                addGuessRow(g, secret, true)
+            })
+
+            const lastGuess = saved[saved.length - 1]
+
+            // ✅ use correct flag instead of name comparison
+            if (lastGuess.correct) {
+                updateHints()
+                updateGuessesLeft()
+                showWin()
+                return
+            }
+        }
     }
 
     updateHints()
@@ -72,16 +80,14 @@ function updatePuzzleDisplay(){
     text.textContent = `Puzzle #${currentPuzzleNumber}`
 
 }
-
 function resetGame(){
-    
 
     const imgContainer = document.getElementById("characterImageContainer")
     imgContainer.style.display = "none"
 
     const nameElm = document.getElementById("Name")
     nameElm.style.display = "none"
-    nameElm.textContent = ""   // clear old name
+    nameElm.textContent = ""
 
     const table = document.getElementById("guessTable")
     while(table.rows.length > 1){
@@ -91,12 +97,22 @@ function resetGame(){
     document.getElementById("guessInput").disabled = false
     document.querySelector("#guessArea button").disabled = false
 
+    // ✅ RESET HINT BUTTONS COMPLETELY
+    const hintBtns = [
+        document.getElementById("hintBtn1"),
+        document.getElementById("hintBtn2"),
+        document.getElementById("hintBtn3")
+    ]
+
+    hintBtns.forEach(btn => {
+        btn.disabled = true
+        btn.classList.remove("enabled")
+        delete btn.dataset.listenerAdded   // 🔥 THIS FIXES YOUR ISSUE
+    })
+
     hideAllHints()
-    updateNavButtons()
-    updateGuessesLeft()
     startGame()
 }
-
 function updateGuessesLeft(){
 
     const text = document.getElementById("guessesLeftText")
@@ -394,10 +410,10 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     document.getElementById("oldGame").addEventListener("click", () => {
-
-    puzzleOffset++
-    resetGame()
-
+    if (currentPuzzleNumber > 1) {
+        puzzleOffset++
+        resetGame()
+    }
     })
 
     document.getElementById("nextGame").addEventListener("click", () => {
@@ -431,10 +447,16 @@ function showWin(data){
         nameElm.style.display = "block"
         
     }
+    const countdown = document.getElementById("countdown")
+    const counthead = document.getElementById("counthead")
+
     if (puzzleOffset === 0) {
-    startCountdown("countdown")
+        countdown.style.display = "block"
+        counthead.style.display = "block"
+        startCountdown("countdown")
     } else {
-        document.getElementById("countdown").style.display = "none"
+        countdown.style.display = "none"
+        counthead.style.display = "none"
     }
 }
 
@@ -462,6 +484,8 @@ function startCountdown(elementId) {
         const diff = target - now
 
         if (diff <= 0) {
+            document.getElementById("counthead").textContent = "none"
+
             document.getElementById(elementId).textContent = "none"
             return
         }
