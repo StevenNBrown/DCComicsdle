@@ -205,6 +205,44 @@ td img {
     align-items: center;
     text-align:center;
 }
+.input-wrapper {
+    position: relative;
+    display: inline-block; /* 👈 keeps input + button layout EXACTLY the same */
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;              /* directly below input */
+    left: 50%;              /* center horizontally */
+    transform: translateX(-50%); /* 👈 true centering */
+
+    width: 100%;            /* same width as input */
+    max-width: 250px;       /* match input width */
+
+    background: rgb(22, 22, 22);
+    border: 1px solid #ccc;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: Le;
+    gap: 10px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #eee;
+}
+
+.dropdown-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
 
 @media (max-width: 768px){
 
@@ -244,6 +282,7 @@ td img {
         font-size:10px;
     }
 }
+
 </style>
 
 </head>
@@ -272,8 +311,11 @@ td img {
 
 <div id="guessArea">
 
-<input id="guessInput" list="charList" autocomplete="off">
-<datalist id="charList"></datalist>
+<div class="input-wrapper">
+    <input id="guessInput" autocomplete="off">
+    <div id="dropdown" class="dropdown"></div>
+</div>
+
 <button onclick="submitGuess()">GUESS</button>
 
 </div>
