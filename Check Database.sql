@@ -4,8 +4,8 @@ SELECT
     c.gender,
     c.chartype,
     c.origin,
-    c.firstappears,   -- corrected if needed
-    c.quotes,           -- corrected if needed
+    c.firstappears,   
+    c.quotes,           
     c.description,
     
     -- Species
@@ -27,12 +27,12 @@ SELECT
     ) AS affiliations,
     
     -- Appearances
-    (SELECT STRING_AGG(ap.apperances, ', ')  -- corrected spelling
+    (SELECT STRING_AGG(ap.apperances, ', ')  
      FROM dccomicsdle_schema.appearance_types ap
      WHERE ap.charname = c.charname
     ) AS appearences,
   
-   (SELECT STRING_AGG(al.aliases, ', ')  -- corrected spelling
+   (SELECT STRING_AGG(al.aliases, ', ')  
      FROM dccomicsdle_schema.aliases al
      WHERE al.charname = c.charname
     ) AS aliases
