@@ -44,11 +44,7 @@ if (savedGuesses) {
     updateHints()
     updateGuessesLeft()
 
-    if (previous.some(g => g.correct)) {
-        showWin()
-        updateHints()
 
-    }
 }
     // Clear old puzzle data
   
