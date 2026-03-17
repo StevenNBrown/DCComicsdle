@@ -5,7 +5,7 @@ I created a live Wordle-style game for fans of DC Comics.
 
 Welcome to DCComicsdle!
 
-This project was built using PostgreSQL (hosted on Neon), FastAPI, and Python for the backend, with HTML, CSS, and JavaScript powering the frontend. The application is hosted on Render.
+This project was built using SQL (hosted on Neon), FastAPI, and Python for the backend, with HTML, CSS, and JavaScript powering the frontend. The application is hosted on Render.
 
 Inspiration
 
