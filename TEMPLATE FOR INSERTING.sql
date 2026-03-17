@@ -1,7 +1,7 @@
 INSERT INTO dccomicsdle_schema.character_info 
 (charname, gender, chartype, origin, photo_url, quotes, description, firstappears, yearappeard)
 VALUES 
-('Wonder Woman', 'W', 'Superhero', 'Earth', 
+('Wonder Woman', 'Female', 'Superhero', 'Earth', 
 'https://static.wikia.nocookie.net/marvel_dc/images/c/cc/Wonder_Woman_Vol_5_4_Textless.jpg/revision/latest?cb=20160810132845', 
 'The Lasso of Truth compels you!', 
 'Princess in a mans world', 
