@@ -119,7 +119,7 @@ function resetGame(){
 function updateGuessesLeft(){
 
     const text = document.getElementById("guessesLeftText")
-
+    text.style.display = "block"
     let nextThreshold = null
 
     if(guesses.length < 5) nextThreshold = HINT_UNLOCK_COUNT
@@ -149,13 +149,13 @@ function hideAllHints() {
     })
 }
 
-function updateHints(){
+function updateHints(guessnum = guesses.length){
 
     const hint1Btn = document.getElementById("hintBtn1")
     const hint2Btn = document.getElementById("hintBtn2")
     const hint3Btn = document.getElementById("hintBtn3")
 
-    if(guesses.length >= HINT_UNLOCK_COUNT){
+    if(guessnum >= HINT_UNLOCK_COUNT){
 
         hint1Btn.disabled = false
         hint1Btn.classList.add("enabled")
@@ -182,7 +182,7 @@ function updateHints(){
         }
     }
 
-    if(guesses.length >= HINT2_UNLOCK_COUNT){
+    if(guessnum >= HINT2_UNLOCK_COUNT){
         
         hint2Btn.disabled = false
         hint2Btn.classList.add("enabled")
@@ -208,7 +208,7 @@ function updateHints(){
             hint2Btn.dataset.listenerAdded = "true"
             }
     }
-    if(guesses.length >= HINT3_UNLOCK_COUNT){
+    if(guessnum >= HINT3_UNLOCK_COUNT){
         hint3Btn.disabled = false
         hint3Btn.classList.add("enabled")
         if(!hint3Btn.dataset.listenerAdded){
@@ -408,9 +408,20 @@ guessInput.addEventListener("input", async function () {
 
     try {
         const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
-        if (!res.ok) return;
 
-        const data = await res.json();
+        if (!res.ok) {
+            dropdown.innerHTML = "";
+            return;
+        }
+
+        let data;
+        try {
+            data = await res.json();
+        } catch {
+            dropdown.innerHTML = "";
+            return;
+        }
+
         if (!Array.isArray(data)) return;
 
         dropdown.innerHTML = "";
@@ -485,6 +496,8 @@ function showWin(data){
         nameElm.style.display = "block"
         
     }
+    updateHints(15)
+    document.getElementById("guessesLeftText").style.display="none"
     const countdown = document.getElementById("countdown")
     const counthead = document.getElementById("counthead")
 
