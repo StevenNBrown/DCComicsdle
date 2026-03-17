@@ -35,7 +35,11 @@ async function startGame() {
 
         previous.forEach(g => {
             guesses.push(g)
-            addGuessRow(g, secret)
+            addGuessRow(g, secret, true)
+             if (guesses.length>0 && guesses[guesses.length-1].charname === secret.charname) {
+                    showWin()
+                    return
+                }
         })
     }
 
@@ -45,13 +49,8 @@ async function startGame() {
     // ===============================
     // CHECK WIN AFTER LOADING GUESSES
     // ===============================
-    const completed = localStorage.getItem(
-        `dccomicsdle_completed_${currentPuzzleNumber}`
-    )
 
-    if (completed === "true") {
-        showWin()
-    }
+
 }
 startGame()
 
@@ -94,6 +93,7 @@ function resetGame(){
 
     hideAllHints()
     updateGuessesLeft()
+    startGame()
 }
 
 function updateGuessesLeft(){
@@ -296,7 +296,7 @@ async function submitGuess(){
     
 }
 
-function addGuessRow(data, secret) {
+function addGuessRow(data, secret, finished=false) {
 
     const table = document.getElementById("guessTable")
     const row = document.createElement("tr")
@@ -332,21 +332,39 @@ function addGuessRow(data, secret) {
     `dccomicsdle_guesses_${currentPuzzleNumber}`,
     JSON.stringify(guesses)
     )
+    const prevBtn = document.getElementById("oldGame")
+    const nextBtn = document.getElementById("nextGame")
 
+    prevBtn.disabled = true
+    nextBtn.disabled = true
     localStorage.setItem("dccomicsdle_last_puzzle", currentPuzzleNumber)
     // Fade in left → right
-    cells.forEach((cell, index) => {
+    if (finished){
+        cells.forEach((cell, index) => {
         setTimeout(() => {
             cell.style.opacity = "1"
-        }, index * 300) // 0.1s delay
+        }, index) // 0.1s delay
     })
-    const animationTime = cells.length * 300
+     animationTime = cells.length 
+    }
+    else{
+        cells.forEach((cell, index) => {
+            setTimeout(() => {
+                cell.style.opacity = "1"
+            }, index * 300) // 0.1s delay
+        })
+     animationTime = cells.length * 300
+    }
 
     if(data.correct){
         setTimeout(() => {
             showWin(data)
         }, animationTime+100) // small buffer so animation fully finishes
     }
+    setTimeout(() => {
+    prevBtn.disabled = false
+    nextBtn.disabled = false
+}, animationTime + 50)
 }
 document.addEventListener("DOMContentLoaded", () => {
     const guessInput = document.getElementById("guessInput")
@@ -378,7 +396,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     puzzleOffset++
     resetGame()
-    startGame()
 
     })
 
@@ -387,7 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(puzzleOffset > 0){
         puzzleOffset--
         resetGame()
-        startGame()
     }
 
     })
@@ -396,10 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function showWin(data){
 
     // Save win PER puzzle
-    localStorage.setItem(
-        `dccomicsdle_completed_${currentPuzzleNumber}`,
-        "true"
-    )
+    
 
     document.getElementById("guessInput").disabled = true
     document.querySelector("#guessArea button").disabled = true
@@ -415,5 +428,6 @@ function showWin(data){
     if(nameElm.style.display !== "block"){
         nameElm.textContent = `${secret.charname}`
         nameElm.style.display = "block"
+        
     }
 }
