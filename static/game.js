@@ -381,7 +381,7 @@ function addGuessRow(data, secret, finished=false) {
     setTimeout(() => {
     prevBtn.disabled = false
     nextBtn.disabled = false
-}, animationTime + 50)
+}, animationTime + 150)
 }
 document.addEventListener("DOMContentLoaded", () => {
     const guessInput = document.getElementById("guessInput")
