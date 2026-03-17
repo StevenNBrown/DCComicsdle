@@ -430,4 +430,51 @@ function showWin(data){
         nameElm.style.display = "block"
         
     }
+    if (puzzleOffset === 0) {
+    startCountdown("countdown")
+    } else {
+        document.getElementById("countdown").style.display = "none"
+    }
+}
+
+
+
+function getNextResetTimeUTC() {
+    const now = new Date()
+
+    // Next UTC midnight
+    const reset = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + 1,
+        0, 0, 0
+    ))
+
+    return reset
+}
+
+function startCountdown(elementId) {
+    const target = getNextResetTimeUTC()
+
+    function updateTimer() {
+        const now = new Date()
+        const diff = target - now
+
+        if (diff <= 0) {
+            document.getElementById(elementId).textContent = "none"
+            return
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60))
+        const minutes = Math.floor((diff / (1000 * 60)) % 60)
+        const seconds = Math.floor((diff / 1000) % 60)
+        document.getElementById('counthead').textContent = 'Next Game in:'
+        document.getElementById(elementId).textContent =
+            `${String(hours).padStart(2, '0')}:` +
+            `${String(minutes).padStart(2, '0')}:` +
+            `${String(seconds).padStart(2, '0')}`
+    }
+
+    updateTimer()
+    setInterval(updateTimer, 1000)
 }
