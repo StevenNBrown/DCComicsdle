@@ -110,7 +110,6 @@ function resetGame(){
     hintBtns.forEach(btn => {
         btn.disabled = true
         btn.classList.remove("enabled")
-        delete btn.dataset.listenerAdded   // 🔥 THIS FIXES YOUR ISSUE
     })
 
     hideAllHints()
