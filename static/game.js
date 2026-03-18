@@ -449,14 +449,6 @@ guessInput.addEventListener("input", async function () {
         console.error("Search failed:", err);
     }
 });
-    // Optional: when user selects an option, show the corresponding image
-    guessInput.addEventListener("change", function () {
-        const val = guessInput.value;
-        const option = Array.from(dropdown.options).find(opt => opt.value === val);
-        if (option && preview) {
-            preview.src = option.dataset.photo || "";
-        }
-    });
 
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
