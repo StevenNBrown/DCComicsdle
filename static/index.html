@@ -21,7 +21,12 @@ background-repeat: no-repeat;
 background-attachment: fixed;
 color:white;
 text-align:center;
+display: flex;
+flex-direction: column;
+margin: 0;
+min-height: 100vh;
 }
+
 #logo {
     margin-top: 20px;
 }
@@ -63,7 +68,6 @@ title{
 
 table{
     margin:auto;
-    margin-top:30px;
     border-collapse:collapse;
     table-layout:fixed; /* fixed column widths */
 }
@@ -112,9 +116,9 @@ td img {
     border-radius: 20px;
     display: block;
 }
-.correct { border-radius: 20px; background-color:#2ecc71; color:white; }
-.partial { border-radius: 20px; background-color:#f07735; color:white; }
-.wrong { border-radius: 20px; background-color:#d3250a; color:white; }
+.correct { border-radius: 20px; background-color:#3cb26d; color:white; }
+.partial { border-radius: 20px; background-color:#e27d46; color:white; }
+.wrong { border-radius: 20px; background-color:#ce412b; color:white; }
 
 .newer {
     border-radius: 20px;
@@ -242,6 +246,19 @@ td img {
     height: 50px;
     object-fit: fill;
 }
+#footer {
+    text-align: center;
+    font-size: 14px;
+    color: white;
+
+    background: rgb(0, 120, 249, 0.6);
+    backdrop-filter: blur(5px);
+
+    margin-top: 30px;
+}
+#mainContent {
+    flex: 1;
+}
 
 @media (max-width: 768px){
 
@@ -288,7 +305,7 @@ td img {
 
 <body>
 
-
+<div id="mainContent">
 <div id="hintsContainer">
     <button id="hintBtn1"disabled>QUOTE</button>
     <button id="hintBtn2" disabled>FIRST APPEARANCE</button>
@@ -383,6 +400,8 @@ td img {
 </div>
 
 </div>
+</div>
+
 </body>
 </html>
 
