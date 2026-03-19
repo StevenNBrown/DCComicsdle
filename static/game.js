@@ -457,6 +457,8 @@ guessInput.addEventListener("input", async function () {
     } catch (err) {
         console.error("Search failed:", err);
     }
+
+});
     document.addEventListener("click", (event) => {
     const guessArea = document.getElementById("guessArea"); // container wrapping input & button
     const dropdown = document.getElementById("dropdown");
@@ -465,8 +467,6 @@ guessInput.addEventListener("input", async function () {
         dropdown.innerHTML = ""; // hide the dropdown
     }
 });
-});
-
 
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
