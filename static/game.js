@@ -398,12 +398,8 @@ const guessInput = document.getElementById("guessInput");
 const dropdown = document.getElementById("dropdown");
 
 
-
-guessInput.addEventListener("input", async function () {
+async function updateDropdown(query){
     
-
-    const query = guessInput.value.trim();
-
     if (!query) {
         dropdown.innerHTML = "";
         return;
@@ -457,17 +453,31 @@ guessInput.addEventListener("input", async function () {
     } catch (err) {
         console.error("Search failed:", err);
     }
+ 
+};
 
+let lastQuery = "";
+
+// Run search on typing
+guessInput.addEventListener("input", async function () {
+    lastQuery = guessInput.value.trim();
+    await updateDropdown(lastQuery);
 });
-    document.addEventListener("click", (event) => {
-    const guessArea = document.getElementById("guessArea"); // container wrapping input & button
-    const dropdown = document.getElementById("dropdown");
 
-    if (!guessArea.contains(event.target) && !dropdown.contains(event.target)) {
-        dropdown.innerHTML = ""; // hide the dropdown
+// Run search when input is clicked/focused
+guessInput.addEventListener("focus", async function () {
+    if (lastQuery) {
+        await updateDropdown(lastQuery);
     }
 });
 
+// Click outside closes dropdown
+document.addEventListener("click", (event) => {
+    const guessArea = document.getElementById("guessArea");
+    if (!guessArea.contains(event.target)) {
+        dropdown.innerHTML = ""; // hide dropdown
+    }
+});
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
         puzzleOffset++
@@ -564,4 +574,6 @@ function startCountdown(elementId) {
     updateTimer()
     setInterval(updateTimer, 1000)
 }
+
+
 
