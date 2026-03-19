@@ -7,6 +7,7 @@ const HINT3_UNLOCK_COUNT = 12  // change this number anytime
 let secret = null  // store secret character
 let currentPuzzleNumber = null
 let todaysPuzzle = null
+let selectedCharacter = null; // stores object from dropdown
 
 async function startGame() {
 
@@ -286,41 +287,41 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
     return "wrong"
 }
 
-async function submitGuess(){
-
-    const name = document.getElementById("guessInput").value.trim()
-
-    // ✅ PREVENT DUPLICATES
-    const alreadyGuessed = guesses.some(g => 
-        g.charname.toLowerCase() === name.toLowerCase()
-    )
-
-    if (alreadyGuessed) {
-        alert("You already guessed that character!");
+async function submitGuess() {
+    if (!selectedCharacter) {
         return;
     }
 
-    const res = await fetch("/guess",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({ name:name })
-    })
+    const name = selectedCharacter.charname; // use the selected character
+    const alreadyGuessed = guesses.some(g =>
+        g.charname.toLowerCase() === name.toLowerCase()
+    );
 
-    if(!res.ok) return
-
-    const data = await res.json()
-
-    if(data.error){
-        alert(data.error)
-        return
+    if (alreadyGuessed) {
+        return;
     }
 
-    guesses.push(data)  
-    updateHints()        
-    updateGuessesLeft() 
-    addGuessRow(data, secret)
+    const res = await fetch("/guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name })
+    });
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    document.getElementById("guessInput").value = "";
+    selectedCharacter = null;
+    guesses.push(data);
+    updateHints();
+    updateGuessesLeft();
+    addGuessRow(data, secret);
 }
 
 function addGuessRow(data, secret, finished=false) {
@@ -397,6 +398,7 @@ const guessInput = document.getElementById("guessInput");
 const dropdown = document.getElementById("dropdown");
 
 guessInput.addEventListener("input", async function () {
+    
 
     const query = guessInput.value.trim();
 
@@ -424,12 +426,17 @@ guessInput.addEventListener("input", async function () {
         if (!Array.isArray(data)) return;
 
         dropdown.innerHTML = "";
-
+        
         data.forEach(item => {
+            const alreadyGuessed = guesses.some(g => 
+            g.charname.toLowerCase() === item.charname.toLowerCase()
+            );
+
+            if (alreadyGuessed) return;
 
             const div = document.createElement("div");
+            
             div.className = "dropdown-item";
-
             div.innerHTML = `
                 <img src="${item.photo_url}">
                 <span>${item.charname}</span>
@@ -437,7 +444,8 @@ guessInput.addEventListener("input", async function () {
 
             // ✅ When clicked → fill input with canonical name
             div.onclick = () => {
-                guessInput.value = item.charname;
+                guessInput.value = item.charname; 
+                selectedCharacter = item;         
                 dropdown.innerHTML = "";
             };
 
@@ -448,7 +456,10 @@ guessInput.addEventListener("input", async function () {
         console.error("Search failed:", err);
     }
 });
-
+guessInput.addEventListener("input", () => {
+    selectedCharacter = null;
+});
+    
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
         puzzleOffset++
