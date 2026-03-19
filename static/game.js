@@ -397,6 +397,8 @@ function addGuessRow(data, secret, finished=false) {
 const guessInput = document.getElementById("guessInput");
 const dropdown = document.getElementById("dropdown");
 
+
+
 guessInput.addEventListener("input", async function () {
     
 
@@ -455,11 +457,17 @@ guessInput.addEventListener("input", async function () {
     } catch (err) {
         console.error("Search failed:", err);
     }
+    document.addEventListener("click", (event) => {
+    const guessArea = document.getElementById("guessArea"); // container wrapping input & button
+    const dropdown = document.getElementById("dropdown");
+
+    if (!guessArea.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.innerHTML = ""; // hide the dropdown
+    }
 });
-guessInput.addEventListener("input", () => {
-    selectedCharacter = null;
 });
-    
+
+
     document.getElementById("oldGame").addEventListener("click", () => {
     if (currentPuzzleNumber > 1) {
         puzzleOffset++
@@ -556,3 +564,4 @@ function startCountdown(elementId) {
     updateTimer()
     setInterval(updateTimer, 1000)
 }
+
