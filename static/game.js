@@ -282,7 +282,8 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
         secretList.includes(item)
     )
 
-    if (intersection.length > 0) return "partial"
+    if (intersection.length > 0||(fieldValue === "Human"&& secretValue=== "Metahuman" )||(fieldValue === "Metahuman"&& secretValue === "Human")) 
+        return "partial"
 
     return "wrong"
 }
