@@ -9,11 +9,10 @@ from datetime import datetime, timezone, date
 
 app = FastAPI()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+conn = psycopg2.connect(
+    "postgresql://neondb_owner:npg_qWkSa79eCNXI@ep-calm-dew-aef8rwqs-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+)
 
-def get_connection():
-    return psycopg2.connect(DATABASE_URL)
-    
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,7 +24,6 @@ app.add_middleware(
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(os.path.join(static_dir, "favicon.ico"))
-    
 guesses=[]
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
@@ -44,17 +42,14 @@ class Guess(BaseModel):
 def start_game(n: int = 0):
     global guesses
     guesses = []
-    
     global secret_character
 
     launch_date = date(2026,3,10)
     today = datetime.now(timezone.utc).date()
     puzzle_number = (today - launch_date).days-n
-    
     if(puzzle_number<1):
         puzzle_number=1
-        
-    conn = get_connection()
+    
     cur = conn.cursor()
     cur.execute("""
         SELECT charname
@@ -111,8 +106,7 @@ def start_game(n: int = 0):
         "affiliations": row[11],
         "appearances": row[12]
     }
-    cur.close()
-    conn.close()
+
     return {"message": "game started", "secret": secret, "puzzle_number": puzzle_number, "todays_puzzle":(today - launch_date).days}
 
 @app.get("/search")
@@ -120,7 +114,7 @@ def search_characters(q: str):
 
     if not q:
         return []
-    conn = get_connection()
+
     cur = conn.cursor()
 
     try:
@@ -135,30 +129,32 @@ def search_characters(q: str):
         ORDER BY 
             CASE 
                 WHEN LOWER(c.charname) = %s THEN 0
-                WHEN LOWER(c.charname) LIKE %s THEN 1
-                WHEN MAX(LOWER(a.aliases)) LIKE %s THEN 2
-                ELSE 3
+                WHEN LOWER(c.charname) LIKE %s THEN 2
+                WHEN MAX(LOWER(a.aliases)) = %s THEN 1
+                WHEN MAX(LOWER(a.aliases)) LIKE %s THEN 4
+                WHEN LOWER(c.charname) LIKE %s THEN 3
+                WHEN MAX(LOWER(a.aliases)) LIKE %s THEN 4
+                ELSE 5
             END,
             c.charname
         LIMIT 20
-    """, (f"%{q.lower()}%", f"%{q.lower()}%",f"{q.lower()}",f"%{q.lower()}%", f"%{q.lower()}%"))
+    """, (f"%{q.lower()}%", f"%{q.lower()}%",f"{q.lower()}",f"{q.lower()}%", f"{q.lower()}", f"{q.lower()}%",f"% {q.lower()}%", f"% {q.lower()}%"))
 
         rows = cur.fetchall()
 
         return [
-        {"charname": row[0], "photo_url": row[1]}
-        for row in rows
+            {"charname": row[0], "photo_url": row[1]}
+            for row in rows
         ]
 
     finally:
-        conn.close()
         cur.close()
 
 @app.post("/guess")
 def guess_character(guess: Guess):
 
     global secret_character
-    conn = get_connection()
+
     cur = conn.cursor()
 
     cur.execute("""
