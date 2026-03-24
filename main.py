@@ -72,7 +72,7 @@ def start_game(n: int = 0):
         cur.execute("""
             INSERT INTO dccomicsdle_schema.puzzlenum (charname,num)
             VALUES (%s,%s)
-            ON CONFLICT (num) DO NOTHING
+           ON CONFLICT (num) DO UPDATE SET charname = EXCLUDED.charname
         """,(secret_character,puzzle_number))
 
         conn.commit()
