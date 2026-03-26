@@ -257,13 +257,6 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
         return "older"
     }
 
-    // ======================
-    // NORMAL EXACT MATCH
-    // ======================
-    
-    // ======================
-    // PARTIAL MATCH
-    // ======================
     const fieldList = fieldValue
     .toString()
     .split(",")
@@ -326,7 +319,7 @@ async function submitGuess() {
 }
 
 function addGuessRow(data, secret, finished=false) {
-
+    document.getElementById("Name").style.display="none"
     const table = document.getElementById("guessTable")
     const row = document.createElement("tr")
 
@@ -350,6 +343,7 @@ function addGuessRow(data, secret, finished=false) {
     cells.push(createCell(data.year, getCellClass(data.year, secret.year,true)))
     cells.push(createCell(data.appearances, getCellClass(data.appearances, secret.appearances)))
 
+    
     // Start hidden
     cells.forEach(cell => {
         cell.style.opacity = "0"
@@ -390,6 +384,36 @@ function addGuessRow(data, secret, finished=false) {
             showWin(data)
         }, animationTime+100) // small buffer so animation fully finishes
     }
+    else{
+    const tempdata=structuredClone(data)
+    const tempsecret=structuredClone(secret)
+
+    delete tempdata.photo_url
+    delete tempdata.charname
+    delete tempdata.quote
+    delete tempdata.first_appearance
+    delete tempdata.description
+    delete tempdata.correct
+
+    delete tempsecret.photo_url
+    delete tempsecret.charname
+    delete tempsecret.quote
+    delete tempsecret.first_appearance
+    delete tempsecret.description
+
+    
+-   setTimeout(() => {
+    const nameElm = document.getElementById("Name")
+    if (JSON.stringify(tempdata) === JSON.stringify(tempsecret)){
+        nameElm.textContent = `All Correct But Not Todays Character`
+        console.log(nameElm)
+        nameElm.style.display = "block"
+    }
+    else{
+        nameElm.textContent =""
+        nameElm.style.display="none"
+    }}, animationTime + 100)
+}
     setTimeout(() => {
     prevBtn.disabled = false
     nextBtn.disabled = false
@@ -511,9 +535,10 @@ function showWin(data){
     imgContainer.style.display = "block"
 
     const nameElm = document.getElementById("Name")
-
+    nameElm.style.display="none"
     if(nameElm.style.display !== "block"){
         nameElm.textContent = `${secret.charname}`
+        nameElm.style.fontSize='30px'
         nameElm.style.display = "block"
         
     }
