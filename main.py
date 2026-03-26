@@ -9,9 +9,10 @@ from datetime import datetime, timezone, date
 
 app = FastAPI()
 
-conn = psycopg2.connect(
-    "postgresql://neondb_owner:npg_qWkSa79eCNXI@ep-calm-dew-aef8rwqs-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-)
+DATABASE_URL = os.environ["DATABASE_URL"]
+
+def get_connection():
+    return psycopg2.connect(DATABASE_URL)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,6 +25,7 @@ app.add_middleware(
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(os.path.join(static_dir, "favicon.ico"))
+
 guesses=[]
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
@@ -50,6 +52,7 @@ def start_game(n: int = 0):
     if(puzzle_number<1):
         puzzle_number=1
     
+    conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
         SELECT charname
@@ -106,7 +109,8 @@ def start_game(n: int = 0):
         "affiliations": row[11],
         "appearances": row[12]
     }
-
+    cur.close()
+    conn.close()
     return {"message": "game started", "secret": secret, "puzzle_number": puzzle_number, "todays_puzzle":(today - launch_date).days}
 
 @app.get("/search")
@@ -115,6 +119,7 @@ def search_characters(q: str):
     if not q:
         return []
 
+    conn = get_connection()
     cur = conn.cursor()
 
     try:
@@ -149,12 +154,15 @@ def search_characters(q: str):
 
     finally:
         cur.close()
+        conn.close()
+        
 
 @app.post("/guess")
 def guess_character(guess: Guess):
 
     global secret_character
 
+    conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
