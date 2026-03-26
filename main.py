@@ -72,7 +72,7 @@ def start_game(n: int = 0):
         cur.execute("""
             INSERT INTO dccomicsdle_schema.puzzlenum (charname,num)
             VALUES (%s,%s)
-           ON CONFLICT (num) DO UPDATE SET charname = EXCLUDED.charname
+            ON CONFLICT (num) DO NOTHING
         """,(secret_character,puzzle_number))
 
         conn.commit()
@@ -162,8 +162,8 @@ def guess_character(guess: Guess):
     c.photo_url,
     c.charname,
     c.gender,
-    c.chartype,
     c.origin,
+    c.chartype,
     c.yearappeard,   -- corrected if needed
  
     
@@ -205,12 +205,12 @@ def guess_character(guess: Guess):
         "charname": row[1],
         "photo_url": row[0],
         "gender": row[2],
-        "chartype": row[3],
+        "chartype": row[4],
+        "origin": row[3],
+        "year": row[5],
         "species": row[6],
         "powers": row[7],
-        "origin": row[4],
         "affiliations": row[8],
-        "year": row[5],
         "appearances": row[9],
         "correct": row[1].lower() == secret_character.lower()
     }
