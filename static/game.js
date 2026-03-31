@@ -271,14 +271,16 @@ function getCellClass(fieldValue, secretValue, isYear = false) {
     if (JSON.stringify(fieldList) === JSON.stringify(secretList)) {
         return "correct"
     }
-    const intersection = fieldList.filter(item =>
-        secretList.includes(item)
-    )
-
-    if (intersection.length > 0||(fieldValue === "Human"&& secretValue=== "Metahuman" )||(fieldValue === "Metahuman"&& secretValue === "Human")) 
-        return "partial"
+   const intersection = fieldList.filter(item => secretList.includes(item))
+    
+    const humanMetaMatch =
+    (fieldList.includes("human") && secretList.includes("metahuman")) ||
+    (fieldList.includes("metahuman") && secretList.includes("human"))
+    if (intersection.length > 0 || humanMetaMatch)
+    return "partial"
 
     return "wrong"
+
 }
 
 async function submitGuess() {
