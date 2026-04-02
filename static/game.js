@@ -412,15 +412,26 @@ function addGuessRow(data, secret, finished=false) {
     
 -   setTimeout(() => {
     const nameElm = document.getElementById("Name")
-    if (JSON.stringify(tempdata) === JSON.stringify(tempsecret)){
-        nameElm.textContent = `All Correct But Not Todays Character`
-        console.log(nameElm)
-        nameElm.style.display = "block"
+    if (!data.correct) {
+    const allMatch =
+        getCellClass(data.gender, secret.gender) === "correct" &&
+        getCellClass(data.chartype, secret.chartype) === "correct" &&
+        getCellClass(data.species, secret.species) === "correct" &&
+        getCellClass(data.powers, secret.powers) === "correct" &&
+        getCellClass(data.origin, secret.origin) === "correct" &&
+        getCellClass(data.affiliations, secret.affiliations) === "correct" &&
+        getCellClass(data.year, secret.year, true) === "correct" &&
+        getCellClass(data.appearances, secret.appearances) === "correct";
+
+    if (allMatch) {
+        nameElm.textContent = `All Correct But Not Today's Character`;
+        nameElm.style.display = "block";
+    } else {
+        nameElm.textContent = "";
+        nameElm.style.display = "none";
     }
-    else{
-        nameElm.textContent =""
-        nameElm.style.display="none"
-    }}, animationTime + 100)
+}
+}, animationTime + 100)
 }
     setTimeout(() => {
     prevBtn.disabled = false
