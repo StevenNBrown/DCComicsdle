@@ -8,6 +8,12 @@ let secret = null  // store secret character
 let currentPuzzleNumber = null
 let todaysPuzzle = null
 let selectedCharacter = null; // stores object from dropdown
+let sessionId = localStorage.getItem("dccomicsdle_session");
+
+if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    localStorage.setItem("dccomicsdle_session", sessionId);
+}
 
 async function startGame() {
 
@@ -297,10 +303,10 @@ async function submitGuess() {
         return;
     }
 
-    const res = await fetch("/guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name })
+    const res = await fetch(`/guess?session_id=${sessionId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name })
     });
 
     if (!res.ok) return;
