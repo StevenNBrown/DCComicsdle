@@ -157,12 +157,12 @@ def search_characters(q: str):
         conn.close()
         
 
+
 @app.post("/guess")
-def guess_character(guess: Guess):
+def guess_character(guess: Guess, session_id: str):
 
     global secret_character
 
-    conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
@@ -222,8 +222,13 @@ def guess_character(guess: Guess):
         "appearances": row[9],
         "correct": row[1].lower() == secret_character.lower()
     }
-    if any(g['charname'].lower() == result['charname'].lower() for g in guesses):
-         return {"error": "Character already guessed"}
-    else:
-        guesses.append(result)
-        return result
+
+
+    user_list = user_guesses[session_id]
+
+    if any(g['charname'].lower() == result['charname'].lower() for g in user_list):
+        return {"error": "Character already guessed"}
+
+    user_list.append(result)
+
+    return result
