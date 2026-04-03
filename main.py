@@ -162,7 +162,7 @@ def search_characters(q: str):
 def guess_character(guess: Guess, session_id: str):
 
     global secret_character
-
+    conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
