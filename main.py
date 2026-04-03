@@ -162,73 +162,72 @@ def search_characters(q: str):
 def guess_character(guess: Guess, session_id: str):
 
     global secret_character
+    global user_guesses
+
     conn = get_connection()
     cur = conn.cursor()
 
-    cur.execute("""
-    SELECT 
-    c.photo_url,
-    c.charname,
-    c.gender,
-    c.origin,
-    c.chartype,
-    c.yearappeard,   -- corrected if needed
- 
-    
-    -- Species
-    (SELECT STRING_AGG(s.species, ', '  ORDER BY s.species)
-     FROM dccomicsdle_schema.species s
-     WHERE s.charname = c.charname
-    ) AS species,
-    
-    -- Powers
-    (SELECT STRING_AGG(p.powers, ', '  ORDER BY p.powers)
-     FROM dccomicsdle_schema.powers p
-     WHERE p.charname = c.charname
-    ) AS powers,
-    
-    -- Affiliations
-    (SELECT STRING_AGG(a.affiliations, ', '  ORDER BY a.affiliations)
-     FROM dccomicsdle_schema.affiliations a
-     WHERE a.charname = c.charname
-    ) AS affiliations,
-    
-    -- Appearances
-    (SELECT STRING_AGG(ap.apperances, ', '  ORDER BY ap.apperances)  
-     FROM dccomicsdle_schema.appearance_types ap
-     WHERE ap.charname = c.charname
-    ) AS appearences
-                
-    FROM dccomicsdle_schema.character_info c
-    WHERE charname = %s
-    ORDER BY c.charname;
-    """,(guess.name,))
+    try:
+        cur.execute("""
+        SELECT 
+        c.photo_url,
+        c.charname,
+        c.gender,
+        c.origin,
+        c.chartype,
+        c.yearappeard,
+        
+        (SELECT STRING_AGG(s.species, ', ' ORDER BY s.species)
+         FROM dccomicsdle_schema.species s
+         WHERE s.charname = c.charname) AS species,
+        
+        (SELECT STRING_AGG(p.powers, ', ' ORDER BY p.powers)
+         FROM dccomicsdle_schema.powers p
+         WHERE p.charname = c.charname) AS powers,
+        
+        (SELECT STRING_AGG(a.affiliations, ', ' ORDER BY a.affiliations)
+         FROM dccomicsdle_schema.affiliations a
+         WHERE a.charname = c.charname) AS affiliations,
+        
+        (SELECT STRING_AGG(ap.apperances, ', ' ORDER BY ap.apperances)
+         FROM dccomicsdle_schema.appearance_types ap
+         WHERE ap.charname = c.charname) AS appearences
+                    
+        FROM dccomicsdle_schema.character_info c
+        WHERE charname = %s;
+        """, (guess.name,))
 
-    row = cur.fetchone()
+        row = cur.fetchone()
 
-    if not row:
-        return {"error":"Character not found"}
+        if not row:
+            return {"error": "Character not found"}
 
-    result = {
-        "charname": row[1],
-        "photo_url": row[0],
-        "gender": row[2],
-        "chartype": row[4],
-        "origin": row[3],
-        "year": row[5],
-        "species": row[6],
-        "powers": row[7],
-        "affiliations": row[8],
-        "appearances": row[9],
-        "correct": row[1].lower() == secret_character.lower()
-    }
+        if session_id not in user_guesses:
+            user_guesses[session_id] = []
 
+        user_list = user_guesses[session_id]
 
-    user_list = user_guesses[session_id]
+        result = {
+            "charname": row[1],
+            "photo_url": row[0],
+            "gender": row[2],
+            "chartype": row[4],
+            "origin": row[3],
+            "year": row[5],
+            "species": row[6],
+            "powers": row[7],
+            "affiliations": row[8],
+            "appearances": row[9],
+            "correct": row[1].lower() == secret_character.lower()
+        }
 
-    if any(g['charname'].lower() == result['charname'].lower() for g in user_list):
-        return {"error": "Character already guessed"}
+        if any(g['charname'].lower() == result['charname'].lower() for g in user_list):
+            return {"error": "Character already guessed"}
 
-    user_list.append(result)
+        user_list.append(result)
 
-    return result
+        return result
+
+    finally:
+        cur.close()
+        conn.close()
