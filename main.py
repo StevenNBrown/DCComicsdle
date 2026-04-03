@@ -163,7 +163,7 @@ def guess_character(guess: Guess, session_id: str):
 
     global secret_character
     global user_guesses
-
+    user_guesses = {}
     conn = get_connection()
     cur = conn.cursor()
 
