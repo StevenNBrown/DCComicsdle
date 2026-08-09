@@ -1,20 +1,27 @@
 let guesses = []
-let puzzleOffset = 0
-const HINT_UNLOCK_COUNT = 5  // change this number anytime
-const HINT2_UNLOCK_COUNT = 9  // change this number anytime
-const HINT3_UNLOCK_COUNT = 12  // change this number anytime
 
-let secret = null  // store secret character
+const HINT_UNLOCK_COUNT = 5
+const HINT2_UNLOCK_COUNT = 9
+const HINT3_UNLOCK_COUNT = 12
+
+let secret = null
+let puzzleOffset = 0
 let currentPuzzleNumber = null
 let todaysPuzzle = null
-let selectedCharacter = null; // stores object from dropdown
-let accountId = localStorage.getItem("dccomicsdle_account_id");
-let sessionId = localStorage.getItem("dccomicsdle_session");
+let selectedCharacter = null
+
+let accountId = localStorage.getItem("dccomicsdle_account_id")
+let sessionId = localStorage.getItem("dccomicsdle_session")
+
+let completedPuzzles = new Set()
+let puzzleDropdownOpen = false
 
 if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    localStorage.setItem("dccomicsdle_session", sessionId);
+    sessionId = crypto.randomUUID()
+    localStorage.setItem("dccomicsdle_session", sessionId)
 }
+
+
 
 async function loadSavedGuesses() {
 
@@ -66,8 +73,24 @@ async function loadSavedGuesses() {
         });
 
         if (winningGuess) {
-            showWin(winningGuess);
+
+        completedPuzzles.add(
+        currentPuzzleNumber
+        );
+
+        buildPuzzleDropdown();
+
+        showWin(winningGuess);
+
+        if (winningGuess) {
+
+            completedPuzzles.add(currentPuzzleNumber)
+
+            buildPuzzleDropdown()
+
+            showWin(winningGuess)
         }
+    }
 
     } catch (err) {
 
@@ -78,76 +101,105 @@ async function loadSavedGuesses() {
 
 async function startGame() {
 
-    guesses = [];
-    secret = null;
+    guesses = []
+    secret = null
+    selectedCharacter = null
 
-    const res = await fetch(`/start?n=${puzzleOffset}`);
-    const data = await res.json();
+    try {
 
-    secret = data.secret;
-    currentPuzzleNumber = data.puzzle_number;
-    todaysPuzzle = data.todays_puzzle;
+        const res = await fetch(`/start?n=${puzzleOffset}`)
 
-    updatePuzzleDisplay();
-    updateNavButtons();
+        if (!res.ok) {
+            console.error("Failed to start game")
+            return
+        }
 
-    const countdown = document.getElementById("countdown");
-    const counthead = document.getElementById("counthead");
+        const data = await res.json()
 
-    countdown.style.display = "none";
-    counthead.style.display = "none";
+        secret = data.secret
+        currentPuzzleNumber = data.puzzle_number
+        todaysPuzzle = data.todays_puzzle
 
-    // ============================================================
-    // LOAD GUESSES FROM DATABASE
-    // ============================================================
+        console.log("Started puzzle:", currentPuzzleNumber)
+        console.log("Today's puzzle:", todaysPuzzle)
+        console.log("Puzzle offset:", puzzleOffset)
 
-    await loadSavedGuesses();
+        updatePuzzleDisplay()
+        updateNavButtons()
 
-    // ============================================================
-    // UPDATE UI
-    // ============================================================
+        const countdown = document.getElementById("countdown")
+        const counthead = document.getElementById("counthead")
 
-    updateHints();
-    updateGuessesLeft();
+        countdown.style.display = "none"
+        counthead.style.display = "none"
+
+        // Load which puzzles this player has completed
+        await loadCompletedPuzzles()
+
+        // Build selector after completed puzzles are known
+        buildPuzzleDropdown()
+
+        // Load this puzzle's saved guesses
+        await loadSavedGuesses()
+
+        updateHints()
+        updateGuessesLeft()
+
+        updateNavButtons()
+
+    } catch (err) {
+
+        console.error("startGame failed:", err)
+
+    }
 }
 startGame()
 
-function updateNavButtons(){
+function updateNavButtons() {
 
     const prevBtn = document.getElementById("oldGame")
     const nextBtn = document.getElementById("nextGame")
 
-    // Can't go before puzzle 1
-    if(currentPuzzleNumber===1)
-        prevBtn.disabled=true
-    else{ prevBtn.disabled=false}
-    // Can't go forward past today
-    nextBtn.disabled = puzzleOffset === 0
+    if (!prevBtn || !nextBtn || currentPuzzleNumber === null) {
+        return
+    }
+
+    // Left arrow = older puzzle
+    prevBtn.disabled = currentPuzzleNumber <= 1
+
+    // Right arrow = newer puzzle
+    nextBtn.disabled = currentPuzzleNumber >= todaysPuzzle
 }
+
 function updatePuzzleDisplay(){
 
     const text = document.getElementById("puzzleNumber")
     text.textContent = `Puzzle #${currentPuzzleNumber}`
 
 }
-function resetGame(){
+function resetGame() {
 
-    const imgContainer = document.getElementById("characterImageContainer")
+    const imgContainer =
+        document.getElementById("characterImageContainer")
+
     imgContainer.style.display = "none"
 
-    const nameElm = document.getElementById("Name")
+    const nameElm =
+        document.getElementById("Name")
+
     nameElm.style.display = "none"
     nameElm.textContent = ""
 
-    const table = document.getElementById("guessTable")
-    while(table.rows.length > 1){
+    const table =
+        document.getElementById("guessTable")
+
+    while (table.rows.length > 1) {
         table.deleteRow(1)
     }
 
     document.getElementById("guessInput").disabled = false
     document.querySelector("#guessArea button").disabled = false
 
-    // ✅ RESET HINT BUTTONS COMPLETELY
     const hintBtns = [
         document.getElementById("hintBtn1"),
         document.getElementById("hintBtn2"),
@@ -155,11 +207,14 @@ function resetGame(){
     ]
 
     hintBtns.forEach(btn => {
+
         btn.disabled = true
         btn.classList.remove("enabled")
+
     })
 
     hideAllHints()
+
     startGame()
 }
 function updateGuessesLeft(){
@@ -369,8 +424,19 @@ async function submitGuess() {
     document.getElementById("guessInput").value = "";
     selectedCharacter = null;
     guesses.push(data);
+
+    if (data.correct) {
+
+        completedPuzzles.add(
+            currentPuzzleNumber
+        );
+
+        buildPuzzleDropdown();
+    }
+
     updateHints();
     updateGuessesLeft();
+
     addGuessRow(data, secret);
 }
 
@@ -411,8 +477,15 @@ function addGuessRow(data, secret, finished=false) {
     const prevBtn = document.getElementById("oldGame")
     const nextBtn = document.getElementById("nextGame")
 
-    prevBtn.disabled = true
-    nextBtn.disabled = true
+    localStorage.setItem(
+    "dccomicsdle_last_puzzle",
+    currentPuzzleNumber
+    )
+
+    if (!finished) {
+        prevBtn.disabled = true
+        nextBtn.disabled = true
+    }
     localStorage.setItem("dccomicsdle_last_puzzle", currentPuzzleNumber)
     // Fade in left → right
     if (finished) {
@@ -550,44 +623,6 @@ async function updateDropdown(query){
  
 };
 
-let lastQuery = "";
-
-// Run search on typing
-guessInput.addEventListener("input", async function () {
-    lastQuery = guessInput.value.trim();
-    await updateDropdown(lastQuery);
-});
-
-// Run search when input is clicked/focused
-guessInput.addEventListener("focus", async function () {
-    if (lastQuery) {
-        await updateDropdown(lastQuery);
-    }
-});
-
-// Click outside closes dropdown
-document.addEventListener("click", (event) => {
-    const guessArea = document.getElementById("guessArea");
-    if (!guessArea.contains(event.target)) {
-        dropdown.innerHTML = ""; // hide dropdown
-    }
-});
-    document.getElementById("oldGame").addEventListener("click", () => {
-    if (currentPuzzleNumber > 1) {
-        puzzleOffset++
-        resetGame()
-    }
-    })
-
-    document.getElementById("nextGame").addEventListener("click", () => {
-
-    if(puzzleOffset > 0){
-        puzzleOffset--
-        resetGame()
-    }
-
-    })
-
 
 function showWin(data){
 
@@ -670,5 +705,241 @@ function startCountdown(elementId) {
     setInterval(updateTimer, 1000)
 }
 
+async function loadCompletedPuzzles() {
 
+    try {
+
+        let url =
+            `/completed-puzzles?session_id=${encodeURIComponent(sessionId)}`;
+
+        if (accountId) {
+            url += `&account_id=${encodeURIComponent(accountId)}`;
+        }
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            console.error("Failed to load completed puzzles");
+            return;
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data.completed)) {
+            return;
+        }
+
+        completedPuzzles = new Set(data.completed);
+
+    } catch (err) {
+
+        console.error(
+            "Failed to load completed puzzles:",
+            err
+        );
+
+    }
+}
+
+function buildPuzzleDropdown() {
+
+    const list =
+        document.getElementById("puzzleDropdownList")
+
+    if (!list) {
+        console.error("puzzleDropdownList not found")
+        return
+    }
+
+    list.innerHTML = ""
+
+    if (!todaysPuzzle || todaysPuzzle < 1) {
+        return
+    }
+
+    for (let puzzleNumber = todaysPuzzle;
+         puzzleNumber >= 1;
+         puzzleNumber--) {
+
+        const button =
+            document.createElement("button")
+
+        button.type = "button"
+        button.className = "puzzleDropdownItem"
+
+        button.textContent =
+            `Puzzle #${puzzleNumber}`
+
+        // Currently selected puzzle
+        if (puzzleNumber === currentPuzzleNumber) {
+            button.classList.add("current")
+        }
+
+        // Completed puzzle
+        if (completedPuzzles.has(puzzleNumber)) {
+            button.classList.add("completed")
+        }
+
+        button.addEventListener("click", function(event) {
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            selectPuzzle(puzzleNumber)
+        })
+
+        list.appendChild(button)
+    }
+}
+
+function selectPuzzle(puzzleNumber) {
+
+    if (!todaysPuzzle) {
+        return
+    }
+
+    if (
+        puzzleNumber < 1 ||
+        puzzleNumber > todaysPuzzle
+    ) {
+        return
+    }
+
+    console.log("Selecting puzzle:", puzzleNumber)
+
+    // Convert puzzle number into the offset expected by /start
+    puzzleOffset = todaysPuzzle - puzzleNumber
+
+    closePuzzleDropdown()
+
+    resetGame()
+}
+
+function togglePuzzleDropdown(event) {
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const dropdown =
+        document.getElementById("puzzleDropdown")
+
+    if (!dropdown) {
+        console.error("puzzleDropdown not found")
+        return
+    }
+
+    puzzleDropdownOpen = !puzzleDropdownOpen
+
+    if (puzzleDropdownOpen) {
+
+        buildPuzzleDropdown()
+
+        dropdown.classList.add("open")
+
+    } else {
+
+        closePuzzleDropdown()
+
+    }
+}
+function closePuzzleDropdown() {
+
+    const dropdown =
+        document.getElementById("puzzleDropdown")
+
+    if (!dropdown) {
+        return
+    }
+
+    puzzleDropdownOpen = false
+
+    dropdown.classList.remove("open")
+}
+
+function setupPuzzleSelector() {
+
+    const button =
+        document.getElementById("puzzleNumberButton")
+
+    const dropdown =
+        document.getElementById("puzzleDropdown")
+
+    if (!button) {
+        console.error("puzzleNumberButton not found")
+        return
+    }
+
+    if (!dropdown) {
+        console.error("puzzleDropdown not found")
+        return
+    }
+
+    button.type = "button"
+
+    button.addEventListener("click", togglePuzzleDropdown)
+
+    dropdown.addEventListener("click", function(event) {
+
+        event.stopPropagation()
+
+    })
+
+    document.addEventListener("click", function() {
+
+        closePuzzleDropdown()
+
+    })
+}
+
+setupPuzzleSelector()
+
+
+
+let lastQuery = "";
+
+// Run search on typing
+guessInput.addEventListener("input", async function () {
+    lastQuery = guessInput.value.trim();
+    await updateDropdown(lastQuery);
+});
+
+// Run search when input is clicked/focused
+guessInput.addEventListener("focus", async function () {
+    if (lastQuery) {
+        await updateDropdown(lastQuery);
+    }
+});
+
+// Click outside closes dropdown
+setupPuzzleSelector();
+
+document.addEventListener("click", (event) => {
+    const guessArea = document.getElementById("guessArea");
+
+    if (!guessArea.contains(event.target)) {
+        dropdown.innerHTML = "";
+    }
+});
+
+document.getElementById("oldGame").addEventListener("click", () => {
+    if (puzzleOffset < todaysPuzzle - 1) {
+        puzzleOffset++;
+        resetGame();
+    }
+});
+
+document.getElementById("nextGame").addEventListener("click", () => {
+    if (puzzleOffset > 0) {
+        puzzleOffset--;
+        resetGame();
+    }
+});
+
+    document.addEventListener("click", (event) => {
+    const guessArea = document.getElementById("guessArea");
+
+    if (!guessArea.contains(event.target)) {
+        dropdown.innerHTML = "";
+    }
+});
 
