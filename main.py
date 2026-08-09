@@ -613,3 +613,45 @@ def attach_session(
 
     finally:
         cur.close()
+
+@app.get("/completed-puzzles")
+def get_completed_puzzles(
+    session_id: str,
+    account_id: int | None = None
+):
+    cur = conn.cursor()
+
+    try:
+
+        if account_id is not None:
+
+            cur.execute("""
+                SELECT DISTINCT g.puzzle_number
+                FROM dccomicsdle_schema.guesses g
+                JOIN dccomicsdle_schema.puzzlenum p
+                    ON p.num = g.puzzle_number
+                WHERE g.account_id = %s
+                  AND LOWER(g.charname) = LOWER(p.charname)
+                ORDER BY g.puzzle_number
+            """, (account_id,))
+
+        else:
+
+            cur.execute("""
+                SELECT DISTINCT g.puzzle_number
+                FROM dccomicsdle_schema.guesses g
+                JOIN dccomicsdle_schema.puzzlenum p
+                    ON p.num = g.puzzle_number
+                WHERE g.session_id = %s
+                  AND LOWER(g.charname) = LOWER(p.charname)
+                ORDER BY g.puzzle_number
+            """, (session_id,))
+
+        rows = cur.fetchall()
+
+        return {
+            "completed": [row[0] for row in rows]
+        }
+
+    finally:
+        cur.close()
