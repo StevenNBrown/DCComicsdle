@@ -8,6 +8,7 @@ let secret = null  // store secret character
 let currentPuzzleNumber = null
 let todaysPuzzle = null
 let selectedCharacter = null; // stores object from dropdown
+let accountId = localStorage.getItem("dccomicsdle_account_id");
 let sessionId = localStorage.getItem("dccomicsdle_session");
 
 if (!sessionId) {
@@ -15,60 +16,99 @@ if (!sessionId) {
     localStorage.setItem("dccomicsdle_session", sessionId);
 }
 
+async function loadSavedGuesses() {
+
+    try {
+
+        let url =
+            `/saved-guesses?` +
+            `puzzle_number=${currentPuzzleNumber}` +
+            `&session_id=${encodeURIComponent(sessionId)}`;
+
+        if (accountId) {
+            url += `&account_id=${encodeURIComponent(accountId)}`;
+        }
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            console.error("Failed to load saved guesses");
+            return;
+        }
+
+        const savedGuesses = await res.json();
+
+        if (!Array.isArray(savedGuesses)) {
+            return;
+        }
+
+        // Load each saved guess into the game
+        savedGuesses.forEach(g => {
+
+            // Mark as already guessed
+            guesses.push(g);
+
+            // IMPORTANT:
+            // finished=true means NO animation
+            addGuessRow(g, secret, true);
+        });
+
+        // Update UI based on loaded guesses
+        updateHints();
+        updateGuessesLeft();
+
+        // Check whether the player already won
+        const winningGuess = savedGuesses.find(g => {
+
+            return g.charname.toLowerCase() ===
+                   secret.charname.toLowerCase();
+
+        });
+
+        if (winningGuess) {
+            showWin(winningGuess);
+        }
+
+    } catch (err) {
+
+        console.error("Failed to load saved guesses:", err);
+
+    }
+}
+
 async function startGame() {
 
-    guesses = []
-    secret = null
+    guesses = [];
+    secret = null;
 
-    const res = await fetch(`/start?n=${puzzleOffset}`)
-    const data = await res.json()
+    const res = await fetch(`/start?n=${puzzleOffset}`);
+    const data = await res.json();
 
-    secret = data.secret
-    currentPuzzleNumber = data.puzzle_number
-    todaysPuzzle = data.todays_puzzle
+    secret = data.secret;
+    currentPuzzleNumber = data.puzzle_number;
+    todaysPuzzle = data.todays_puzzle;
 
-    updatePuzzleDisplay()
-    updateNavButtons()
-    const countdown = document.getElementById("countdown")
-    const counthead = document.getElementById("counthead")
-    countdown.style.display = "none"
-    counthead.style.display = "none"
-    // ===============================
-    // LOAD SAVED GUESSES
-    // ===============================
-    const savedGuesses = localStorage.getItem(
-    `dccomicsdle_guesses_${currentPuzzleNumber}`
-    )
+    updatePuzzleDisplay();
+    updateNavButtons();
 
-    if (savedGuesses) {
-        const saved = JSON.parse(savedGuesses)
+    const countdown = document.getElementById("countdown");
+    const counthead = document.getElementById("counthead");
 
-        if (saved && saved.length > 0) {
-            saved.forEach(g => {
-                guesses.push(g)
-                addGuessRow(g, secret, true)
-            })
+    countdown.style.display = "none";
+    counthead.style.display = "none";
 
-            const lastGuess = saved[saved.length - 1]
+    // ============================================================
+    // LOAD GUESSES FROM DATABASE
+    // ============================================================
 
-            // ✅ use correct flag instead of name comparison
-            if (lastGuess.correct) {
-                updateHints()
-                updateGuessesLeft()
-                showWin()
-                return
-            }
-        }
-    }
+    await loadSavedGuesses();
 
-    updateHints()
-    updateGuessesLeft()
+    // ============================================================
+    // UPDATE UI
+    // ============================================================
 
-    // ===============================
-    // CHECK WIN AFTER LOADING GUESSES
-    // ===============================
-
-
+    updateHints();
+    updateGuessesLeft();
 }
 startGame()
 
@@ -303,7 +343,15 @@ async function submitGuess() {
         return;
     }
 
-    const res = await fetch(`/guess?session_id=${sessionId}`, {
+    let guessUrl =
+    `/guess?session_id=${encodeURIComponent(sessionId)}` +
+        `&puzzle_number=${encodeURIComponent(currentPuzzleNumber)}`;
+
+    if (accountId) {
+        guessUrl += `&account_id=${encodeURIComponent(accountId)}`;
+    }
+
+    const res = await fetch(guessUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: name })
@@ -359,10 +407,7 @@ function addGuessRow(data, secret, finished=false) {
     })
 
     table.insertBefore(row, table.rows[1])
-    localStorage.setItem(
-    `dccomicsdle_guesses_${currentPuzzleNumber}`,
-    JSON.stringify(guesses)
-    )
+
     const prevBtn = document.getElementById("oldGame")
     const nextBtn = document.getElementById("nextGame")
 
@@ -370,21 +415,26 @@ function addGuessRow(data, secret, finished=false) {
     nextBtn.disabled = true
     localStorage.setItem("dccomicsdle_last_puzzle", currentPuzzleNumber)
     // Fade in left → right
-    if (finished){
-        cells.forEach((cell, index) => {
-        setTimeout(() => {
-            cell.style.opacity = "1"
-        }, index) // 0.1s delay
-    })
-     animationTime = cells.length 
+    if (finished) {
+
+        cells.forEach(cell => {
+            cell.style.opacity = "1";
+        });
+
+        animationTime = 0;
+
     }
-    else{
+    else {
+
         cells.forEach((cell, index) => {
+
             setTimeout(() => {
-                cell.style.opacity = "1"
-            }, index * 300) // 0.1s delay
-        })
-     animationTime = cells.length * 300
+                cell.style.opacity = "1";
+            }, index * 300);
+
+        });
+
+        animationTime = cells.length * 300;
     }
 
     if(data.correct){
