@@ -9,7 +9,9 @@ let puzzleOffset = 0
 let currentPuzzleNumber = null
 let todaysPuzzle = null
 let selectedCharacter = null
-
+let dropdownSelectedIndex = -1;
+let puzzleSelectedIndex = -1;
+let currentDropdownData = [];
 let accountId = localStorage.getItem("dccomicsdle_account_id")
 let sessionId = localStorage.getItem("dccomicsdle_session")
 
@@ -565,15 +567,19 @@ const guessInput = document.getElementById("guessInput");
 const dropdown = document.getElementById("dropdown");
 
 
-async function updateDropdown(query){
-    
+async function updateDropdown(query) {
+
     if (!query) {
         dropdown.innerHTML = "";
+        dropdownSelectedIndex = -1;
         return;
     }
 
     try {
-        const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+
+        const res = await fetch(
+            `/search?q=${encodeURIComponent(query)}`
+        );
 
         if (!res.ok) {
             dropdown.innerHTML = "";
@@ -581,6 +587,7 @@ async function updateDropdown(query){
         }
 
         let data;
+
         try {
             data = await res.json();
         } catch {
@@ -588,40 +595,224 @@ async function updateDropdown(query){
             return;
         }
 
-        if (!Array.isArray(data)) return;
+        if (!Array.isArray(data)) {
+            dropdown.innerHTML = "";
+            return;
+        }
+
+        currentDropdownData = data;
 
         dropdown.innerHTML = "";
-        
+
         data.forEach(item => {
-            const alreadyGuessed = guesses.some(g => 
-            g.charname.toLowerCase() === item.charname.toLowerCase()
+
+            const alreadyGuessed = guesses.some(g =>
+                g.charname.toLowerCase() ===
+                item.charname.toLowerCase()
             );
 
             if (alreadyGuessed) return;
 
             const div = document.createElement("div");
-            
+
             div.className = "dropdown-item";
+
             div.innerHTML = `
                 <img src="${item.photo_url}">
                 <span>${item.charname}</span>
             `;
 
-            // ✅ When clicked → fill input with canonical name
-            div.onclick = () => {
-                guessInput.value = item.charname; 
-                selectedCharacter = item;         
-                dropdown.innerHTML = "";
-            };
+            div.addEventListener("mousedown", (event) => {
+
+    // Prevent the input from losing focus
+            event.preventDefault();
+            event.stopPropagation();
+
+            guessInput.value = item.charname;
+            selectedCharacter = item;
+
+            dropdown.innerHTML = "";
+
+            // Keep the selected character remembered
+            dropdownSelectedIndex = -1;
+        });
 
             dropdown.appendChild(div);
         });
 
+        const items = Array.from(
+            dropdown.querySelectorAll(".dropdown-item")
+        );
+
+        // --------------------------------------------------------
+        // Restore the selected character
+        // --------------------------------------------------------
+
+        if (selectedCharacter && items.length > 0) {
+
+            const selectedIndex = items.findIndex(item => {
+
+                const name =
+                    item.querySelector("span").textContent;
+
+                return name.toLowerCase() ===
+                    selectedCharacter.charname.toLowerCase();
+
+            });
+
+            if (selectedIndex !== -1) {
+
+                dropdownSelectedIndex = selectedIndex;
+
+                updateCharacterHighlight(items);
+
+            } else {
+
+                dropdownSelectedIndex = -1;
+            }
+
+        } else {
+
+            dropdownSelectedIndex = -1;
+        }
+
+        if (dropdown.children.length > 0) {
+            dropdown.style.display = "block";
+        }
+
     } catch (err) {
+
         console.error("Search failed:", err);
+
     }
- 
-};
+}
+
+
+guessInput.addEventListener("keydown", async function(event) {
+
+    const items = Array.from(
+        dropdown.querySelectorAll(".dropdown-item")
+    );
+
+
+    if (event.key === "Escape") {
+
+        dropdown.innerHTML = "";
+        dropdownSelectedIndex = -1;
+
+        return;
+    }
+
+
+    if (event.key === "ArrowDown") {
+
+        if (items.length === 0) return;
+
+        event.preventDefault();
+
+        dropdownSelectedIndex++;
+
+        if (dropdownSelectedIndex >= items.length) {
+            dropdownSelectedIndex = 0;
+        }
+
+        updateCharacterHighlight(items);
+
+        return;
+    }
+
+
+    if (event.key === "ArrowUp") {
+
+        if (items.length === 0) return;
+
+        event.preventDefault();
+
+        dropdownSelectedIndex--;
+
+        if (dropdownSelectedIndex < 0) {
+            dropdownSelectedIndex = items.length - 1;
+        }
+
+        updateCharacterHighlight(items);
+
+        return;
+    }
+
+    
+    if (event.key === "Enter") {
+
+
+        if (items.length > 0) {
+
+            event.preventDefault();
+
+            if (dropdownSelectedIndex < 0) {
+                return;
+            }
+
+            const selectedItem =
+                items[dropdownSelectedIndex];
+
+            if (!selectedItem) return;
+
+            const name =
+                selectedItem.querySelector("span").textContent;
+
+            const photo =
+                selectedItem.querySelector("img").src;
+
+            selectedCharacter = {
+                charname: name,
+                photo_url: photo
+            };
+
+            // Put selected character into input
+            guessInput.value = name;
+
+            // Close dropdown
+            dropdown.innerHTML = "";
+            dropdownSelectedIndex = -1;
+
+            // DO NOT GUESS HERE
+            return;
+        }
+
+
+        if (selectedCharacter) {
+
+            event.preventDefault();
+
+            await submitGuess();
+
+            return;
+        }
+    }
+
+});
+
+
+function updateCharacterHighlight(items) {
+
+    items.forEach((item, index) => {
+
+        if (index === dropdownSelectedIndex) {
+
+            item.classList.add("keyboard-selected");
+
+            // Keep selected item visible
+            item.scrollIntoView({
+                block: "nearest"
+            });
+
+        } else {
+
+            item.classList.remove("keyboard-selected");
+
+        }
+
+    });
+}
 
 
 function showWin(data){
@@ -742,7 +933,6 @@ async function loadCompletedPuzzles() {
 }
 
 function buildPuzzleDropdown() {
-
     const list =
         document.getElementById("puzzleDropdownList")
 
@@ -767,8 +957,8 @@ function buildPuzzleDropdown() {
         button.type = "button"
         button.className = "puzzleDropdownItem"
 
-        button.textContent =
-            `Puzzle #${puzzleNumber}`
+        button.textContent = `Puzzle #${puzzleNumber}`; 
+        button.dataset.puzzleNumber = puzzleNumber;
 
         // Currently selected puzzle
         if (puzzleNumber === currentPuzzleNumber) {
@@ -790,6 +980,30 @@ function buildPuzzleDropdown() {
 
         list.appendChild(button)
     }
+}
+
+function updatePuzzleHighlight(items) {
+
+    items.forEach((item, index) => {
+
+        if (index === puzzleSelectedIndex) {
+
+            item.classList.add(
+                "puzzleKeyboardSelected"
+            );
+
+            item.scrollIntoView({
+                block: "nearest"
+            });
+
+        } else {
+
+            item.classList.remove(
+                "puzzleKeyboardSelected"
+            );
+        }
+
+    });
 }
 
 function selectPuzzle(puzzleNumber) {
@@ -817,31 +1031,129 @@ function selectPuzzle(puzzleNumber) {
 
 function togglePuzzleDropdown(event) {
 
-    event.preventDefault()
-    event.stopPropagation()
+    event.stopPropagation();
 
     const dropdown =
-        document.getElementById("puzzleDropdown")
+        document.getElementById("puzzleDropdown");
 
-    if (!dropdown) {
-        console.error("puzzleDropdown not found")
-        return
-    }
+    if (!dropdown) return;
 
-    puzzleDropdownOpen = !puzzleDropdownOpen
+    puzzleDropdownOpen = !puzzleDropdownOpen;
 
     if (puzzleDropdownOpen) {
 
-        buildPuzzleDropdown()
+        puzzleSelectedIndex = -1;
 
-        dropdown.classList.add("open")
+        buildPuzzleDropdown();
+
+        dropdown.classList.add("open");
 
     } else {
 
-        closePuzzleDropdown()
-
+        closePuzzleDropdown();
     }
 }
+document.addEventListener("keydown", function(event) {
+
+    const puzzleDropdown =
+        document.getElementById("puzzleDropdown");
+
+    if (!puzzleDropdownOpen || !puzzleDropdown) {
+        return;
+    }
+
+    const items = Array.from(
+        puzzleDropdown.querySelectorAll(".puzzleDropdownItem")
+    );
+
+    if (items.length === 0) return;
+
+
+    // ============================================================
+    // ESCAPE
+    // ============================================================
+
+    if (event.key === "Escape") {
+
+        event.preventDefault();
+
+        closePuzzleDropdown();
+
+        return;
+    }
+
+
+    // ============================================================
+    // DOWN
+    // ============================================================
+
+    if (event.key === "ArrowDown") {
+
+        event.preventDefault();
+
+        puzzleSelectedIndex++;
+
+        if (puzzleSelectedIndex >= items.length) {
+            puzzleSelectedIndex = 0;
+        }
+
+        updatePuzzleHighlight(items);
+
+        return;
+    }
+
+
+    // ============================================================
+    // UP
+    // ============================================================
+
+    if (event.key === "ArrowUp") {
+
+        event.preventDefault();
+
+        puzzleSelectedIndex--;
+
+        if (puzzleSelectedIndex < 0) {
+            puzzleSelectedIndex = items.length - 1;
+        }
+
+        updatePuzzleHighlight(items);
+
+        return;
+    }
+
+
+    // ============================================================
+    // ENTER
+    // ============================================================
+
+    if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        if (puzzleSelectedIndex < 0) {
+            puzzleSelectedIndex = 0;
+        }
+
+        const selected =
+            items[puzzleSelectedIndex];
+
+        if (!selected) return;
+
+        const puzzleNumber =
+            parseInt(
+                selected.dataset.puzzleNumber
+            );
+
+        if (!isNaN(puzzleNumber)) {
+            selectPuzzle(puzzleNumber);
+        }
+
+    }
+
+});
+
+
 function closePuzzleDropdown() {
 
     const dropdown =
@@ -899,12 +1211,26 @@ let lastQuery = "";
 
 // Run search on typing
 guessInput.addEventListener("input", async function () {
+
+    // The user manually changed the text,
+    // so the previously selected character is no longer valid.
+    selectedCharacter = null;
+    dropdownSelectedIndex = -1;
+
     lastQuery = guessInput.value.trim();
+
     await updateDropdown(lastQuery);
 });
 
 // Run search when input is clicked/focused
 guessInput.addEventListener("focus", async function () {
+
+    // Don't rebuild the dropdown when a character
+    // has already been selected
+    if (selectedCharacter) {
+        return;
+    }
+
     if (lastQuery) {
         await updateDropdown(lastQuery);
     }
@@ -942,4 +1268,5 @@ document.getElementById("nextGame").addEventListener("click", () => {
         dropdown.innerHTML = "";
     }
 });
+
 
