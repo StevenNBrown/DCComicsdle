@@ -10,10 +10,9 @@ from collections import defaultdict
 
 
 app = FastAPI()
+DATABASE_URL = os.environ["DATABASE_URL"]
 
-conn = psycopg2.connect(
-    "postgresql://neondb_owner:npg_qWkSa79eCNXI@ep-calm-dew-aef8rwqs-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-)
+conn =  psycopg2.connect(DATABASE_URL)
 
 app.add_middleware(
     CORSMiddleware,
