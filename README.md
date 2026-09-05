@@ -21,6 +21,7 @@ Improving existing DC guessing games.
 While researching, I found DCdle, which had the same concept as DCComicsdle. Although it was a fun game, I noticed that the database included relatively few characters and some category information appeared incorrect. That motivated me to create a version with a larger and more accurate character database.
 
 Future:
+
 Currently I'm working on creating an account system which will allow users to keep their game data across devices. I am also working on better configuration for mobile devices and smaller screens. Finally I am always working on adding more characters to the database!
 
 Play the Game:
