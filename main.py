@@ -10,10 +10,13 @@ from collections import defaultdict
 
 
 app = FastAPI()
+
 DATABASE_URL = os.environ["DATABASE_URL"]
+
 conn = psycopg2.connect(
-   DATABASE_URL
+    DATABASE_URL
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,21 +27,56 @@ app.add_middleware(
 )
 
 
-user_guesses = defaultdict(list)
+# ============================================================
+# STATIC FILES
+# ============================================================
+
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+
+app.mount(
+    "/static",
+    StaticFiles(directory=static_dir),
+    name="static"
+)
+
+app.mount(
+    "/assets",
+    StaticFiles(directory=os.path.join(static_dir, "dist", "assets")),
+    name="assets"
+)
+
+
+# ============================================================
+# FRONTEND
+# ============================================================
+
+@app.get("/")
+def serve_frontend():
+    return FileResponse(
+        os.path.join(static_dir, "dist", "index.html")
+    )
+
 
 @app.get("/favicon.ico")
 def favicon():
-    return FileResponse(os.path.join(static_dir, "favicon.ico"))
-guesses=[]
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    return FileResponse(
+        os.path.join(static_dir, "favicon.ico")
+    )
 
+
+# ============================================================
+# APP DATA
+# ============================================================
+
+user_guesses = defaultdict(list)
+
+guesses = []
 
 secret_character = None
 
+
 class Guess(BaseModel):
-    name: str
-    
+    name: str   
 
 @app.get("/start")
 def start_game(n: int = 0):
