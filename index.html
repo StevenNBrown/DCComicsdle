@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <title>DCComicsdle</title>
+
+   ' <link rel="icon" href="/static/images/DC_Comics_logo.ico">''
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+       <style>
+
+body{
+font-family:Arial;
+background:url("/static/images/background.jpg");
+background-size:cover; /* or 100% 100% to stretch */
+background-position: center;
+background-repeat: no-repeat;
+background-attachment: fixed;
+color:white;
+text-align:center;
+display: flex;
+flex-direction: column;
+margin: 0;
+min-height: 100vh;
+}
+
+#logo {
+    margin-top: 20px;
+}
+
+#logo img {
+    width: 450px;   /* adjust size */
+    max-width: 90%;
+    height: auto;
+}
+h1{
+margin-top:10px;
+}
+
+#guessArea{
+margin-top:10px;
+}
+
+input{
+padding:5px;
+font-size:16px;
+width:250px;
+border-radius:10px;
+
+}
+
+button{
+padding:8px 12px;
+font-size:16px;
+border-radius:15px;
+background:#313d81;
+color:white;
+border:4px solid #0078f9 ;
+cursor:pointer;
+}
+button:hover{
+    background:#0078f9 ;
+    border:4px solid #0078f9 ;
+    border-radius:15px;
+}
+
+
+title{
+    background-image: url("/static/images/logo.png");
+}
+
+table{
+    margin:auto;
+    border-collapse:collapse;
+    table-layout:fixed; /* fixed column widths */
+}
+
+td{
+    width:140px;
+    height:140px;
+    padding:2px;
+    
+    overflow:hidden;
+
+    opacity:0;
+    transition:opacity 0.5s ease;
+}
+
+td div{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    width:100%;
+    height:100%;
+
+    text-align:center;
+
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    font-size:clamp(10px,0.9vw,14px);
+}
+
+th{
+    padding:10px;
+    width:120px;      /* fixed width for all cells */
+    height:20px;      /* fixed height for all cells */
+    align-items: center;
+    vertical-align:center;
+    text-align:center;
+    font-size: 18px;
+}
+
+/* Image inside its own cell */
+td img {
+    width: 100%;
+    height: 100%;
+    object-fit:initial;
+    border-radius: 20px;
+    display: block;
+}
+.correct { border-radius: 20px; background-color:#2ecc71; color:white; }
+.partial { border-radius: 20px; background-color:#f07735; color:white; }
+.wrong { border-radius: 20px; background-color:#d3250a; color:white; }
+
+.newer {
+    border-radius: 20px;
+    background-image: url("/static/images/UpArrow.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;}
+.older {
+    border-radius: 20px;
+    background-image: url("/static/images/DownArrow.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+}
+.hint {
+    display: none;
+    font-size: 18px;
+}
+
+
+#hintsContainer{
+    padding: 5px;
+    border-radius:20px;
+    margin: auto;
+    width: 500px;
+    background:rgb(51,51, 51, 0.8);
+    justify-content: center;
+    align-items: center;
+    text-align:center;
+    border: 4px solid #0078f9;
+}
+
+#hintsContainer button {
+    cursor: not-allowed;
+    background: rgb(49, 62, 129,0.5);
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    margin: 0 4px;
+
+    font-size: clamp(13px, 1vw, 16px);  /* scales down with screen */
+    padding: 8px 8px;                   /* smaller padding = more fit */
+
+    flex-shrink: 1;                     
+    min-width: 0;                       /* 🔥 prevents overflow */
+    white-space: nowrap;                /* keep text on one line */
+}
+
+#hintsContainer button.enabled{
+    cursor:pointer;
+    background:#313d81;
+    border:4px solid #0078f9 ;
+    border-radius:8px;
+}
+
+#hintsContainer button.enabled:hover{
+    background:#0078f9 ;
+    border:4px solid #0078f9 ;
+    border-radius:8px;
+}
+
+#oldgameContainer{
+    margin-top:10px;
+}
+
+#oldgameContainer button{
+    margin:5px;
+    padding:8px 12px;
+    cursor:not-allowed;
+    background:#333;
+    color:white;
+    border:4px solid #0078f9 ;
+    border-radius:20px;
+    cursor:pointer;
+}
+#oldgameContainer button:hover{
+    background:#0078f9 ;
+    border:4px solid #0078f9 ;
+    border-radius:20px;
+}
+
+#characterImageContainer {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+}
+
+#characterImage {
+    width: 300px;
+    height: 300px;
+    object-fit: fill;
+    border-radius: 20px;
+    border: 5px solid #0078f9;
+}
+
+#Name {
+    display: block;
+    font-weight: bold;
+    font-size: 22px;
+}
+#legendBox{
+    margin-top:40px;
+    margin-bottom:40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap:12px;
+}
+
+.legendCell{
+    width:130px;
+    height:130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align:center;
+}
+.input-wrapper {
+    position: relative;
+    display: inline-block; /* 👈 keeps input + button layout EXACTLY the same */
+}
+
+.dropdown {
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+
+    width:250px;
+    max-width:250px;
+
+    background:rgb(22,22,22);
+    border:1px solid #ccc;
+
+    max-height:350px;
+    overflow-y:auto;
+
+    z-index:1000;
+
+    box-sizing:border-box;
+}
+
+.dropdown-item {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+
+    width:100%;
+    box-sizing:border-box;
+
+    border-width: 2px;
+    border-color: #0078f9;
+    border-radius: 8px;
+    background:rgb(22,22,22);
+    color:white;
+
+    text-align:left;
+}
+
+.dropdown-item span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.dropdown-item:hover {
+    background: #0078f9;
+}
+
+.dropdown-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: fill;
+}
+#footer {
+    text-align: center;
+    font-size: 14px;
+    color: white;
+
+    background: rgb(0, 120, 249, 0.6);
+    backdrop-filter: blur(5px);
+
+    margin-top: 30px;
+}
+#mainContent {
+    flex: 1;
+}
+
+@media (max-width: 768px){
+
+    /* Prevent page horizontal movement */
+    html, body{
+        overflow-x: hidden;
+        background-position:right;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+
+    #hintsContainer{
+        padding:5px 5px;
+        border-radius:20px;
+        background:rgb(51,51, 51, 0.8);
+        width:460px;
+        max-width: 90%;
+        border: 4px solid #0078f9;
+    }
+
+    /* Scroll ONLY the table */
+    #tableWrapper{
+        width:100%;
+        overflow-x:auto;
+        overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    #guessTable{
+        width:max-content;   /* allows real scrolling */
+        min-width:600px;
+        table-layout:fixed;
+    }
+
+    /* Smaller cells */
+    td, th{
+        width:90px;
+        height:90px;
+        font-size:14px;
+    }
+
+    #legendBox{
+        gap:5px;
+    }
+
+    .legendCell{
+        width:18vw;
+        height:18vw;
+        font-size:10px;
+    }
+}
+
+#puzzleNavigation {
+    margin-top:10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+
+#puzzleSelector {
+    position: relative;
+}
+
+#puzzleNumberButton {
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-width: 150px;
+    padding: 8px 14px;
+
+    cursor: pointer;
+
+    border: 3px solid #0078f9;;
+    border-radius: 10px;
+
+    font-size: 18px;
+}
+
+#puzzleNumberButton:hover {
+    background-color: #0078f9;
+}
+
+#puzzleDropdownArrow {
+    font-size: 13px;
+}
+
+#puzzleDropdown {
+    position: absolute;
+
+    top: calc(100% + 6px);
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 150px;
+    max-height: 200px;
+
+    overflow-y: auto;
+
+    display: none;
+
+    background: #333;
+    border: 0px solid #ccc;
+    border-radius: 0px;
+
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    z-index: 1000;
+}
+
+#puzzleDropdown.open {
+    display: block;
+}
+
+.puzzleDropdownItem {
+    display: block;
+
+    width: 100%;
+
+
+    border: none;
+    border-radius: 0px;
+    background: rgb(22, 22, 22);
+
+    text-align: center;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+.puzzleDropdownItem:hover {
+    background: #0078f9 ;
+    border-radius: 0px;
+}
+
+.puzzleDropdownItem.completed:hover {
+    background: #0078f9 ;
+    border-radius: 0px;
+}
+.puzzleDropdownItem.current:hover {
+    background: #0078f9 ;
+    border-radius: 0px;
+}
+.puzzleDropdownItem.completed {
+    background: #2ecc71 ;
+    font-weight: bold;
+}
+
+.puzzleDropdownItem.current {
+    background: #313d81 ;
+}
+
+.puzzleDropdownItem.completed::after {
+    content: " ✓";
+}
+
+.dropdown-item.keyboard-selected {
+    background: #0078f9;
+    color: white;
+}
+
+.puzzleDropdownItem.puzzleKeyboardSelected {
+    background: #0078f9;
+    color: white;
+}
+
+@keyframes guessCellFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.guess-row-cell {
+    opacity: 0;
+    animation: guessCellFadeIn 0.7s ease forwards;
+}
+</style>
+</head>
+
+<body>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+
+</body>
+
+</html>
