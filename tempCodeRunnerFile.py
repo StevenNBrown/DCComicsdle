@@ -1,1 +1,0 @@
-    print(secret_character)
