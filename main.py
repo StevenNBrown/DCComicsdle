@@ -57,12 +57,6 @@ def serve_frontend():
     )
 
 
-@app.get("/favicon.ico")
-def favicon():
-    return FileResponse(
-        os.path.join(static_dir, "favicon.ico")
-    )
-
 
 # ============================================================
 # APP DATA
