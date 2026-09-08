@@ -20,7 +20,7 @@ Rather than hard-coding character information into the application, I designed a
 | Layer | Technologies |
 | ----------------- | --------------------- |
 | **Frontend** | React, JavaScript, HTML, CSS |
-| **Backend** | Node.js, Python |
+| **Backend** | Python |
 | **Database** | PostgreSQL, Neon |
 | **API** | REST, JSON |
 | **Hosting** | Render |
@@ -106,7 +106,6 @@ This structure makes it possible to continuously expand the character database w
                                     │
                                     ▼
                          ┌─────────────────────┐
-                         │     Node.js /       │
                          │   Python Backend    │
                          │                     │
                          │ • API Logic         │
@@ -165,8 +164,6 @@ Implementing these comparisons required careful handling of different data types
 
 The frontend was reconfigured from a traditional JavaScript-based implementation into a **React application**, allowing the interface to be broken into reusable components and making application state easier to manage.
 
-The backend architecture was also expanded to incorporate **Node.js alongside Python**, providing experience working across multiple backend technologies within the same full-stack application.
-
 ## API
 
 The application uses REST APIs to communicate between the frontend and backend.
@@ -192,7 +189,6 @@ DCComicsdle/
 │   └── game interface
 │
 ├── backend/
-│   ├── Node.js
 │   └── Python
 │
 ├── character_images/
@@ -214,7 +210,7 @@ Rather than treating the project as a static website, I wanted to build somethin
 Through this project, I gained practical experience with:
 
 - Building component-based interfaces with React
-- Developing backend services using Node.js and Python
+- Developing backend services using Python
 - Designing and querying relational PostgreSQL databases
 - Building and consuming REST APIs
 - Managing frontend application state
@@ -245,4 +241,4 @@ Play DCComicsdle here:
 
 If you're interested in the implementation, the complete source code is available on GitHub.
 
-**Built with React, Node.js, Python, PostgreSQL, and a lot of DC Comics.**
+**Built with React, Python, PostgreSQL, and a lot of DC Comics.**
