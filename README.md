@@ -11,7 +11,7 @@ A full-stack Wordle-style guessing game built around the DC Comics universe.
 
 DCComicsdle is a full-stack web application where players identify a DC Comics character using progressively revealed information such as their **species, powers, affiliations, appearances, aliases, and debut year**.
 
-The project combines a **React frontend, Node.js backend, Python services, and PostgreSQL database** to deliver an interactive guessing experience with dynamic character search, attribute comparisons, progressive hints, and persistent game state.
+The project combines a **React frontend, Python backend, and PostgreSQL database** to deliver an interactive guessing experience with dynamic character search, attribute comparisons, progressive hints, and persistent game state.
 
 Rather than hard-coding character information into the application, I designed and populated a relational database containing **400+ DC Comics characters** and their associated attributes. The application communicates between its frontend and backend through REST APIs and is deployed as a production web application.
 
