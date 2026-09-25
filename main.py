@@ -59,7 +59,7 @@ def serve_frontend():
 @app.get("/favicon.ico")
 def favicon():
     return FileResponse(
-        os.path.join(static_dir, "dist","assets", "DC_Comics_logo.ico")
+        os.path.join(static_dir, "images", "DC_Comics_logo.ico")
     )
 
 # ============================================================
